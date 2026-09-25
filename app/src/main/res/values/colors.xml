@@ -1,0 +1,10 @@
+<resources>
+    <color name="void_bg">#061018</color>
+    <color name="ink">#0B1822</color>
+    <color name="panel">#10202B</color>
+    <color name="paper">#F4F8FB</color>
+    <color name="steel">#9AAFC0</color>
+    <color name="cyan">#2EE6C6</color>
+    <color name="coral">#F07178</color>
+    <color name="up">#5EEAD4</color>
+</resources>

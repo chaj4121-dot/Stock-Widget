@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/void_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="미리보기"
+            android:textColor="@color/paper"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="8dp"
+            android:background="#4a6270">
+
+            <ImageView
+                android:id="@+id/preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:contentDescription="widget preview"
+                android:scaleType="fitXY" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="티커 (최대 4개, 콤마 구분, ^TNX 가능)"
+            android:textColor="@color/steel" />
+
+        <EditText
+            android:id="@+id/tickers"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="6dp"
+            android:background="@color/ink"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,^.- ="
+            android:hint="META, SPCX, ^TNX"
+            android:inputType="textCapCharacters"
+            android:padding="12dp"
+            android:textColor="@color/paper"
+            android:textColorHint="@color/steel" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="글래스"
+            android:textColor="@color/steel" />
+
+        <CheckBox
+            android:id="@+id/glass_on"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="글래스 효과"
+            android:textColor="@color/paper" />
+
+        <RadioGroup
+            android:id="@+id/glass_style"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/glass_frost" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="프로스트" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/glass_mist" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="미스트" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/glass_tint" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="틴트" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/glass_dark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="다크" android:textColor="@color/paper" />
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/glass_style2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/glass_milk" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="밀크" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/glass_clear" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="클리어" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/glass_night" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="나이트" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/glass_edge" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="엣지" android:textColor="@color/paper" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="모서리"
+            android:textColor="@color/steel" />
+
+        <RadioGroup
+            android:id="@+id/corner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/corner_square" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="직각" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/corner_soft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="살짝" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/corner_round" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="라운드" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/corner_pill" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="알약" android:textColor="@color/paper" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/opacity_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="투명도"
+            android:textColor="@color/steel" />
+
+        <SeekBar
+            android:id="@+id/custom_opacity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="90" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="크기"
+            android:textColor="@color/steel" />
+
+        <RadioGroup
+            android:id="@+id/size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/size_compact" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0.5 슬림" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/size_standard" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="표준" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/size_large" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="두껍게" android:textColor="@color/paper" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="글자 색"
+            android:textColor="@color/steel" />
+
+        <RadioGroup
+            android:id="@+id/tone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/tone_light" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="밝은 글자" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/tone_dark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:text="어두운 글자" android:textColor="@color/paper" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/ticker_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="티커 글씨 125%"
+            android:textColor="@color/steel" />
+
+        <SeekBar
+            android:id="@+id/ticker_scale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="70" />
+
+        <TextView
+            android:id="@+id/font_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="주가 글씨 100%"
+            android:textColor="@color/steel" />
+
+        <SeekBar
+            android:id="@+id/font_scale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="70" />
+
+        <TextView
+            android:id="@+id/marquee_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="흐름 속도 x1.0"
+            android:textColor="@color/steel" />
+
+        <SeekBar
+            android:id="@+id/marquee_speed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="250" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="가격 글씨"
+            android:textColor="@color/steel" />
+
+        <RadioGroup
+            android:id="@+id/weight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/weight_regular" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="보통" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/weight_medium" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="미디엄" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/weight_bold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="볼드" android:textColor="@color/paper" />
+        </RadioGroup>
+
+        <CheckBox
+            android:id="@+id/dividers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="티커 구분선"
+            android:textColor="@color/paper" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="가로 정렬"
+            android:textColor="@color/steel" />
+
+        <RadioGroup
+            android:id="@+id/align_h"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/align_left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="좌" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/align_h_center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="가운데" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/align_right" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="우" android:textColor="@color/paper" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="세로 정렬"
+            android:textColor="@color/steel" />
+
+        <RadioGroup
+            android:id="@+id/align_v"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/align_top" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="상" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/align_v_center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="가운데" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/align_bottom" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="하" android:textColor="@color/paper" />
+        </RadioGroup>
+
+        <CheckBox
+            android:id="@+id/header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="제목·시간 표시"
+            android:textColor="@color/paper" />
+
+        <CheckBox
+            android:id="@+id/logos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="회사 로고"
+            android:textColor="@color/paper" />
+
+        <CheckBox
+            android:id="@+id/hide_move"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="휴장 시 상승/하락 숨김"
+            android:textColor="@color/paper" />
+
+        <CheckBox
+            android:id="@+id/weekend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="휴장 시 상단 발사 표시"
+            android:textColor="@color/paper" />
+
+        <CheckBox
+            android:id="@+id/border"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="외곽 테두리"
+            android:textColor="@color/paper" />
+
+        <CheckBox
+            android:id="@+id/sparklines"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="스파크라인"
+            android:textColor="@color/paper" />
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/cyan"
+            android:text="위젯 적용"
+            android:textColor="@color/void_bg" />
+    </LinearLayout>
+</ScrollView>

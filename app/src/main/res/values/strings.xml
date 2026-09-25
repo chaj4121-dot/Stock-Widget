@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Market Telemetry</string>
+    <string name="widget_name">시세 5×1</string>
+    <string name="widget_4_name">시세 4×1</string>
+    <string name="widget_slim_name">시세 슬림 0.5</string>
+    <string name="widget_description">미국 주식 시세 5×1</string>
+    <string name="widget_4_description">미국 주식 시세 4×1</string>
+    <string name="widget_slim_description">4×1·5×1 칸에서 세로 절반만 쓰는 슬림 시세</string>
+</resources>

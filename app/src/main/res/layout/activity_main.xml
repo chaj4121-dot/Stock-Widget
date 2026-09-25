@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/void_bg"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:letterSpacing="0.18"
+        android:text="US EQUITIES · LIVE"
+        android:textColor="@color/cyan"
+        android:textSize="11sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/app_name"
+        android:textColor="@color/paper"
+        android:textSize="26sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:lineSpacingMultiplier="1.35"
+        android:text="홈 화면을 길게 눌러 위젯 → Market Telemetry 를 추가하세요.\n티커는 제한 없이 넣고, 5개부터 4칸씩 순환합니다. ^TNX 가능."
+        android:textColor="@color/steel"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/quotes"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        android:layout_weight="1"
+        android:fontFamily="monospace"
+        android:textColor="@color/paper"
+        android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/open_config"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:backgroundTint="@color/cyan"
+        android:text="위젯 기본 설정"
+        android:textColor="@color/void_bg" />
+</LinearLayout>

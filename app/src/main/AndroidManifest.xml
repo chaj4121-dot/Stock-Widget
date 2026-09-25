@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
+    <application
+        android:name=".TelemetryApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Telemetry">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Telemetry">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".config.ConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Telemetry">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".launch.WeekendActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Telemetry" />
+
+        <receiver
+            android:name=".widget.TelemetryWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="app.telemetry.market.ACTION_REFRESH" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/telemetry_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.Wide4WidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_4_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/telemetry_widget_4x1" />
+        </receiver>
+
+        <receiver
+            android:name=".work.MarqueeScheduler$TickReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="app.telemetry.market.MARQUEE_TICK" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".widget.SlimWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_slim_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="app.telemetry.market.ACTION_REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/telemetry_widget_slim" />
+        </receiver>
+    </application>
+</manifest>
