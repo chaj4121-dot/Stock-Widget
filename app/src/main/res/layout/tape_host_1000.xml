@@ -7,14 +7,11 @@
     android:clipToPadding="true"
     android:layoutAnimation="@anim/tape_layout_1000">
 
-    <TextView
+    <ImageView
         android:id="@+id/widget_tape"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:elegantTextHeight="false"
-        android:fontFamily="sans-serif"
-        android:gravity="center_vertical"
-        android:includeFontPadding="false"
-        android:singleLine="true"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:adjustViewBounds="false"
+        android:scaleType="fitXY" />
 </FrameLayout>

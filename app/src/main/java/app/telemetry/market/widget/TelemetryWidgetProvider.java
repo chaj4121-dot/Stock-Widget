@@ -142,29 +142,32 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
             int w, int h, float density, WidgetPrefs prefs, List<Quote> quotes, Launch launch,
             PendingIntent cfgPi, PendingIntent weekendPi, boolean networkLogos, float marqueeOffset) {
         try {
+            boolean flow = prefs.tickers.length > 4 && Build.VERSION.SDK_INT >= 31;
+            boolean slim = halfBar(manager, id, prefs);
             Map<String, Bitmap> logos = new HashMap<>();
             if (prefs.showLogos) {
-                int size = Math.max(48, Math.round(28f * density));
+                int size = flow
+                        ? TapeComposer.logoPx(prefs, density, slim)
+                        : Math.max(48, Math.round(28f * density));
                 for (Quote q : quotes) {
+                    if (q == null || q.symbol == null) continue;
                     logos.put(q.symbol, LogoCache.get(context, q.symbol, size, networkLogos));
                 }
                 for (String s : prefs.tickers) {
                     if (!logos.containsKey(s)) logos.put(s, LogoCache.get(context, s, size, networkLogos));
                 }
             }
-            boolean flow = prefs.tickers.length > 4 && Build.VERSION.SDK_INT >= 31;
-            boolean slim = halfBar(manager, id, prefs);
             Bitmap bmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos, launch, null, slim, marqueeOffset, flow);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_telemetry);
             views.setImageViewBitmap(R.id.widget_bitmap, bmp);
             views.removeAllViews(R.id.widget_tape_slot);
             if (flow) {
                 int viewport = Math.max(1, w - Math.round(16f * density));
-                TapeComposer.Tape tape = TapeComposer.compose(prefs, quotes, density, viewport, slim);
+                TapeComposer.Tape tape = TapeComposer.compose(prefs, quotes, logos, density, viewport, slim);
                 RemoteViews host = new RemoteViews(context.getPackageName(), TapeComposer.layoutRes(tape.durationMs));
-                host.setTextViewText(R.id.widget_tape, tape.text);
-                host.setTextViewTextSize(R.id.widget_tape, TypedValue.COMPLEX_UNIT_PX, tape.textPx);
+                host.setImageViewBitmap(R.id.widget_tape, tape.bitmap);
                 host.setViewLayoutWidth(R.id.widget_tape, tape.widthPx, TypedValue.COMPLEX_UNIT_PX);
+                host.setViewLayoutHeight(R.id.widget_tape, tape.heightPx, TypedValue.COMPLEX_UNIT_PX);
                 host.setViewPadding(R.id.widget_tape_host, 0, tape.padTopPx, 0, 0);
                 views.addView(R.id.widget_tape_slot, host);
             }
