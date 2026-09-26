@@ -43,6 +43,13 @@ public final class WidgetRenderer {
             int width, int height, float density, WidgetPrefs prefs,
             List<Quote> quotes, Map<String, Bitmap> logos, Launch launch, Bitmap reuse, boolean halfBar,
             float marqueeOffset) {
+        return render(width, height, density, prefs, quotes, logos, launch, reuse, halfBar, marqueeOffset, false);
+    }
+
+    public static Bitmap render(
+            int width, int height, float density, WidgetPrefs prefs,
+            List<Quote> quotes, Map<String, Bitmap> logos, Launch launch, Bitmap reuse, boolean halfBar,
+            float marqueeOffset, boolean liveTape) {
         int w = Math.max(480, width);
         int h = Math.max(80, height);
         Bitmap bmp;
@@ -131,8 +138,10 @@ public final class WidgetRenderer {
         }
 
         if (prefs.tickers.length > 4) {
-            drawMarqueeStrip(c, quotes, logos, prefs, left, right, bodyTop, h,
-                    fg, upC, downC, dark, dp, symbolPx, pricePx, marqueeOffset);
+            if (!liveTape) {
+                drawMarqueeStrip(c, quotes, logos, prefs, left, right, bodyTop, h,
+                        fg, upC, downC, dark, dp, symbolPx, pricePx, marqueeOffset);
+            }
             return bmp;
         }
 

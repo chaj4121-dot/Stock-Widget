@@ -23,6 +23,10 @@ public final class MarqueeScheduler {
     private MarqueeScheduler() {}
 
     public static void start(Context ctx) {
+        if (Build.VERSION.SDK_INT >= 31) {
+            stop(ctx);
+            return;
+        }
         schedule(ctx, SystemClock.elapsedRealtime() + INTERVAL_MS);
     }
 
@@ -68,6 +72,11 @@ public final class MarqueeScheduler {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent == null || !ACTION_TICK.equals(intent.getAction())) return;
+            // API 31+: the chyron runs inside the launcher. Never resume the alarm chain.
+            if (Build.VERSION.SDK_INT >= 31) {
+                stop(context);
+                return;
+            }
 
             AppWidgetManager mgr = AppWidgetManager.getInstance(context);
             Class<?>[] providers = {TelemetryWidgetProvider.class, SlimWidgetProvider.class, Wide4WidgetProvider.class};

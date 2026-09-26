@@ -9,8 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.widget.RemoteViews;
 
 import java.util.HashMap;
@@ -82,7 +84,8 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
     public static void updateOne(Context context, AppWidgetManager manager, int id, boolean network) {
         WidgetPrefs prefs = WidgetPrefs.load(context, id);
         float marqueeOffset = WidgetPrefs.offsetOf(context, id);
-        if (prefs.tickers.length > 4) MarqueeScheduler.start(context);
+        if (Build.VERSION.SDK_INT >= 31) MarqueeScheduler.stop(context);
+        else if (prefs.tickers.length > 4) MarqueeScheduler.start(context);
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
         int[] wh = sizePx(manager, id, dm, prefs);
         int w = wh[0];
@@ -149,11 +152,26 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
                     if (!logos.containsKey(s)) logos.put(s, LogoCache.get(context, s, size, networkLogos));
                 }
             }
-            Bitmap bmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos, launch, null, halfBar(manager, id, prefs), marqueeOffset);
+            boolean flow = prefs.tickers.length > 4 && Build.VERSION.SDK_INT >= 31;
+            boolean slim = halfBar(manager, id, prefs);
+            Bitmap bmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos, launch, null, slim, marqueeOffset, flow);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_telemetry);
             views.setImageViewBitmap(R.id.widget_bitmap, bmp);
+            views.removeAllViews(R.id.widget_tape_slot);
+            if (flow) {
+                int viewport = Math.max(1, w - Math.round(16f * density));
+                TapeComposer.Tape tape = TapeComposer.compose(prefs, quotes, density, viewport, slim);
+                RemoteViews host = new RemoteViews(context.getPackageName(), TapeComposer.layoutRes(tape.durationMs));
+                host.setTextViewText(R.id.widget_tape, tape.text);
+                host.setTextViewTextSize(R.id.widget_tape, TypedValue.COMPLEX_UNIT_PX, tape.textPx);
+                host.setViewLayoutWidth(R.id.widget_tape, tape.widthPx, TypedValue.COMPLEX_UNIT_PX);
+                host.setViewPadding(R.id.widget_tape_host, 0, tape.padTopPx, 0, 0);
+                views.addView(R.id.widget_tape_slot, host);
+            }
             boolean openBoard = prefs.weekendMode && QuoteFetcher.isClosedSession();
-            views.setOnClickPendingIntent(R.id.widget_root, openBoard ? weekendPi : cfgPi);
+            PendingIntent click = openBoard ? weekendPi : cfgPi;
+            views.setOnClickPendingIntent(R.id.widget_root, click);
+            views.setOnClickPendingIntent(R.id.widget_tape_slot, click);
             manager.updateAppWidget(id, views);
         } catch (Throwable t) {
             try {

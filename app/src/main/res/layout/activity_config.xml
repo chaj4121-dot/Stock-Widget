@@ -197,6 +197,13 @@
             android:max="250" />
 
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="5개 이상은 홈 화면이 직접 흘립니다. One UI 알람 제한을 쓰지 않아 끊기지 않습니다."
+            android:textColor="@color/steel"
+            android:textSize="12sp" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
