@@ -10,8 +10,8 @@ android {
         applicationId "app.telemetry.market"
         minSdk 26
         targetSdk 34
-        versionCode 29
-        versionName "1.9.7"
+        versionCode 31
+        versionName "2.0.1"
     }
 
     buildTypes {
