@@ -31,6 +31,7 @@ import app.telemetry.market.widget.LogoCache;
 import app.telemetry.market.widget.TelemetryWidgetProvider;
 import app.telemetry.market.widget.WidgetPrefs;
 import app.telemetry.market.widget.WidgetRenderer;
+import app.telemetry.market.work.QuoteScheduler;
 
 public class ConfigActivity extends AppCompatActivity {
     private int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
@@ -143,14 +144,18 @@ public class ConfigActivity extends AppCompatActivity {
         fontLabel.setText(String.format(Locale.US, "주가 글씨 %d%%", Math.round(prefs.fontScale * 100)));
 
         SeekBar mSpeed = findViewById(R.id.marquee_speed);
-        mSpeed.setProgress(Math.round((prefs.marqueeSpeed - 0.5f) * 100f));
+        mSpeed.setProgress(Math.round((prefs.marqueeSpeed - 0.1f) * 100f));
         ((TextView) findViewById(R.id.marquee_label)).setText(
                 String.format(Locale.US, "흐름 속도 x%.1f", prefs.marqueeSpeed));
+
+        int refreshMin = WidgetPrefs.refreshMinutes(this);
+        SeekBar refresh = findViewById(R.id.refresh_min);
+        refresh.setProgress(WidgetPrefs.refreshIndex(refreshMin));
+        ((TextView) findViewById(R.id.refresh_label)).setText(WidgetPrefs.refreshLabel(refreshMin));
 
         ((CheckBox) findViewById(R.id.header)).setChecked(prefs.showHeader);
         ((CheckBox) findViewById(R.id.logos)).setChecked(prefs.showLogos);
         ((CheckBox) findViewById(R.id.hide_move)).setChecked(prefs.hideMoveWhenClosed);
-        ((CheckBox) findViewById(R.id.weekend)).setChecked(prefs.weekendMode);
         ((CheckBox) findViewById(R.id.border)).setChecked(prefs.showBorder);
         ((CheckBox) findViewById(R.id.sparklines)).setChecked(prefs.showSparklines);
         ((CheckBox) findViewById(R.id.dividers)).setChecked(prefs.showDividers);
@@ -178,6 +183,9 @@ public class ConfigActivity extends AppCompatActivity {
         findViewById(R.id.save).setOnClickListener(v -> {
             WidgetPrefs next = collect();
             next.save(this, appWidgetId);
+            int refreshIdx = ((SeekBar) findViewById(R.id.refresh_min)).getProgress();
+            WidgetPrefs.saveRefreshMinutes(this, WidgetPrefs.REFRESH_CHOICES[refreshIdx]);
+            QuoteScheduler.ensure(this);
             WidgetPrefs.putMarqueeStart(this, appWidgetId, android.os.SystemClock.elapsedRealtime());
             if (appWidgetId != 0) {
                 TelemetryWidgetProvider.updateAll(this);
@@ -191,7 +199,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void bindPreviewListeners() {
         android.view.View.OnClickListener click = v -> refreshPreview();
-        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.weekend, R.id.border, R.id.sparklines, R.id.dividers};
+        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.border, R.id.sparklines, R.id.dividers};
         for (int id : boxes) ((CheckBox) findViewById(id)).setOnClickListener(click);
         int[] groups = {R.id.glass_style, R.id.glass_style2, R.id.size, R.id.tone, R.id.corner, R.id.weight, R.id.align_h, R.id.align_v};
         for (int id : groups) {
@@ -215,7 +223,10 @@ public class ConfigActivity extends AppCompatActivity {
                             .setText(String.format(Locale.US, "티커 글씨 %d%%", 80 + progress));
                 } else if (seekBar.getId() == R.id.marquee_speed) {
                     ((TextView) findViewById(R.id.marquee_label))
-                            .setText(String.format(Locale.US, "흐름 속도 x%.1f", 0.5f + progress / 100f));
+                            .setText(String.format(Locale.US, "흐름 속도 x%.1f", 0.1f + progress / 100f));
+                } else if (seekBar.getId() == R.id.refresh_min) {
+                    int minutes = WidgetPrefs.REFRESH_CHOICES[Math.max(0, Math.min(progress, WidgetPrefs.REFRESH_CHOICES.length - 1))];
+                    ((TextView) findViewById(R.id.refresh_label)).setText(WidgetPrefs.refreshLabel(minutes));
                 } else {
                     ((TextView) findViewById(R.id.opacity_label))
                             .setText(String.format(Locale.US, "투명도 %d%%", progress));
@@ -229,6 +240,7 @@ public class ConfigActivity extends AppCompatActivity {
         ((SeekBar) findViewById(R.id.marquee_speed)).setOnSeekBarChangeListener(seek);
         ((SeekBar) findViewById(R.id.ticker_scale)).setOnSeekBarChangeListener(seek);
         ((SeekBar) findViewById(R.id.custom_opacity)).setOnSeekBarChangeListener(seek);
+        ((SeekBar) findViewById(R.id.refresh_min)).setOnSeekBarChangeListener(seek);
         ((EditText) findViewById(R.id.tickers)).addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
             @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
@@ -265,11 +277,10 @@ public class ConfigActivity extends AppCompatActivity {
         next.textTone = ((RadioButton) findViewById(R.id.tone_dark)).isChecked() ? "dark" : "light";
         next.fontScale = 0.8f + ((SeekBar) findViewById(R.id.font_scale)).getProgress() / 100f;
         next.tickerScale = 0.8f + ((SeekBar) findViewById(R.id.ticker_scale)).getProgress() / 100f;
-        next.marqueeSpeed = 0.5f + ((SeekBar) findViewById(R.id.marquee_speed)).getProgress() / 100f;
+        next.marqueeSpeed = 0.1f + ((SeekBar) findViewById(R.id.marquee_speed)).getProgress() / 100f;
         next.showHeader = ((CheckBox) findViewById(R.id.header)).isChecked();
         next.showLogos = ((CheckBox) findViewById(R.id.logos)).isChecked();
         next.hideMoveWhenClosed = ((CheckBox) findViewById(R.id.hide_move)).isChecked();
-        next.weekendMode = ((CheckBox) findViewById(R.id.weekend)).isChecked();
         next.showBorder = ((CheckBox) findViewById(R.id.border)).isChecked();
         next.showSparklines = ((CheckBox) findViewById(R.id.sparklines)).isChecked();
         next.showDividers = ((CheckBox) findViewById(R.id.dividers)).isChecked();
@@ -302,8 +313,7 @@ public class ConfigActivity extends AppCompatActivity {
         int w = iv.getWidth() > 80 ? iv.getWidth() : Math.max(720, Math.round(getResources().getDisplayMetrics().widthPixels * 0.92f));
         int h = Math.max(iv.getHeight(), Math.round(150 * density));
         boolean half = "compact".equals(prefs.size);
-        previewBmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos,
-                app.telemetry.market.launch.LaunchFetcher.next(this), previewBmp, half);
+        previewBmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos, previewBmp, half);
         iv.setImageBitmap(previewBmp);
     }
 

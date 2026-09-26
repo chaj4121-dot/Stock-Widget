@@ -194,12 +194,33 @@
             android:id="@+id/marquee_speed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="250" />
+            android:max="290" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="5개 이상은 홈 화면이 직접 흘립니다. One UI 알람 제한을 쓰지 않아 끊기지 않습니다."
+            android:textColor="@color/steel"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/refresh_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="시세 갱신 5분"
+            android:textColor="@color/steel" />
+
+        <SeekBar
+            android:id="@+id/refresh_min"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="6" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1분, 2분, 5분, 10분, 15분, 30분, 1시간. 화면이 꺼지면 조금 늦을 수 있습니다."
             android:textColor="@color/steel"
             android:textSize="12sp" />
 
@@ -281,13 +302,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="휴장 시 상승/하락 숨김"
-            android:textColor="@color/paper" />
-
-        <CheckBox
-            android:id="@+id/weekend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="휴장 시 상단 발사 표시"
             android:textColor="@color/paper" />
 
         <CheckBox

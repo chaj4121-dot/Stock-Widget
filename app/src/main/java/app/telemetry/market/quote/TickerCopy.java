@@ -2,8 +2,6 @@ package app.telemetry.market.quote;
 
 import java.util.Locale;
 
-import app.telemetry.market.launch.Launch;
-
 public final class TickerCopy {
     private TickerCopy() {}
 
@@ -52,42 +50,10 @@ public final class TickerCopy {
         }
     }
 
-    public static String story(Quote q, Launch launch) {
-        if (q == null) return "주말엔 시세 대신 자리를 봐요.";
+    public static String story(Quote q) {
+        if (q == null) return "시세를 아직 못 가져왔어요.";
         String name = koreanName(q.symbol);
-        if (Launch.isLaunchTicker(q.symbol) && launch != null) {
-            return name + ". 다음 발사까지 " + koreanCountdown(launch.netMs) + ". " + koreanMission(launch) + ".";
-        }
-        String biz = bizLine(q.symbol);
-        String seat = seatLine(q);
-        String last = lastLine(q);
-        return name + ". " + biz + " " + seat + " " + last;
-    }
-
-    public static String koreanCountdown(long netMs) {
-        long s = (netMs - System.currentTimeMillis()) / 1000L;
-        if (s <= 0) return "거의 직전이에요";
-        long d = s / 86400;
-        long h = (s % 86400) / 3600;
-        long m = (s % 3600) / 60;
-        if (d >= 2) return d + "일 " + h + "시간 남았어요";
-        if (d == 1) return "하루 " + h + "시간 남았어요";
-        if (h >= 1) return h + "시간 " + m + "분 남았어요";
-        return m + "분 남았어요";
-    }
-
-    public static String koreanMission(Launch launch) {
-        String m = launch.mission + " " + launch.name;
-        String lower = m.toLowerCase(Locale.US);
-        if (lower.contains("starlink")) {
-            String num = m.replaceAll("(?i).*?(starlink\\s*(group\\s*)?)", "");
-            num = num.replaceAll("[^0-9\\-].*", "").trim();
-            return num.isEmpty() ? "스타링크 발사" : "스타링크 " + num;
-        }
-        if (lower.contains("starship") || lower.contains("flight")) return "스타십 시험비행";
-        if (lower.contains("crew")) return "유인 발사";
-        if (lower.contains("ussf")) return "미 우주군 임무";
-        return launch.shortMission();
+        return name + ". " + bizLine(q.symbol) + " " + seatLine(q) + " " + lastLine(q);
     }
 
     private static String bizLine(String symbol) {
@@ -109,7 +75,7 @@ public final class TickerCopy {
                 return "차·에너지·로봇을 묶어 봐요.";
             case "SPCX":
             case "SPACE":
-                return "발사와 스타링크가 이 이름이에요.";
+                return "로켓과 위성 인터넷이 본업이에요.";
             case "UNH":
                 return "미국 의료보험이 본업이에요.";
             case "NFLX":

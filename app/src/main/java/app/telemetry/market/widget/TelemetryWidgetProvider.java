@@ -23,9 +23,6 @@ import java.util.concurrent.Executors;
 
 import app.telemetry.market.R;
 import app.telemetry.market.config.ConfigActivity;
-import app.telemetry.market.launch.Launch;
-import app.telemetry.market.launch.LaunchFetcher;
-import app.telemetry.market.launch.WeekendActivity;
 import app.telemetry.market.quote.Quote;
 import app.telemetry.market.quote.QuoteCache;
 import app.telemetry.market.quote.QuoteFetcher;
@@ -93,11 +90,9 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
         WidgetPrefs.saveSize(context, id, w, h, dm.density);
 
         PendingIntent cfgPi = activityPi(context, ConfigActivity.class, id, id);
-        PendingIntent weekendPi = activityPi(context, WeekendActivity.class, id, id + 2000);
 
         List<Quote> cached = QuoteCache.merge(prefs.tickers, null, QuoteCache.load(context));
-        Launch cachedLaunch = LaunchFetcher.next(context);
-        push(context, manager, id, w, h, dm.density, prefs, cached, cachedLaunch, cfgPi, weekendPi, false, marqueeOffset);
+        push(context, manager, id, w, h, dm.density, prefs, cached, cfgPi, false, marqueeOffset);
 
         if (!network) return;
         final int fw = w;
@@ -107,12 +102,7 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
             List<Quote> fresh = QuoteFetcher.fetch(prefs.tickers);
             List<Quote> merged = QuoteCache.merge(prefs.tickers, fresh, QuoteCache.load(context));
             if (!fresh.isEmpty()) QuoteCache.save(context, merged);
-            try {
-                LaunchFetcher.refresh(context);
-            } catch (Exception ignored) {
-            }
-            Launch launch = LaunchFetcher.next(context);
-            push(context, manager, id, fw, fh, density, prefs, merged, launch, cfgPi, weekendPi, true, marqueeOffset);
+            push(context, manager, id, fw, fh, density, prefs, merged, cfgPi, true, marqueeOffset);
         });
     }
 
@@ -139,8 +129,8 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
 
     private static void push(
             Context context, AppWidgetManager manager, int id,
-            int w, int h, float density, WidgetPrefs prefs, List<Quote> quotes, Launch launch,
-            PendingIntent cfgPi, PendingIntent weekendPi, boolean networkLogos, float marqueeOffset) {
+            int w, int h, float density, WidgetPrefs prefs, List<Quote> quotes,
+            PendingIntent cfgPi, boolean networkLogos, float marqueeOffset) {
         try {
             boolean flow = prefs.tickers.length > 4 && Build.VERSION.SDK_INT >= 31;
             boolean slim = halfBar(manager, id, prefs);
@@ -157,7 +147,7 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
                     if (!logos.containsKey(s)) logos.put(s, LogoCache.get(context, s, size, networkLogos));
                 }
             }
-            Bitmap bmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos, launch, null, slim, marqueeOffset, flow);
+            Bitmap bmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos, null, slim, marqueeOffset, flow);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_telemetry);
             views.setImageViewBitmap(R.id.widget_bitmap, bmp);
             views.removeAllViews(R.id.widget_tape_slot);
@@ -171,10 +161,8 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
                 host.setViewPadding(R.id.widget_tape_host, 0, tape.padTopPx, 0, 0);
                 views.addView(R.id.widget_tape_slot, host);
             }
-            boolean openBoard = prefs.weekendMode && QuoteFetcher.isClosedSession();
-            PendingIntent click = openBoard ? weekendPi : cfgPi;
-            views.setOnClickPendingIntent(R.id.widget_root, click);
-            views.setOnClickPendingIntent(R.id.widget_tape_slot, click);
+            views.setOnClickPendingIntent(R.id.widget_root, cfgPi);
+            views.setOnClickPendingIntent(R.id.widget_tape_slot, cfgPi);
             manager.updateAppWidget(id, views);
         } catch (Throwable t) {
             try {
