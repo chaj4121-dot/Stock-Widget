@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import app.telemetry.market.launch.Launch;
 import app.telemetry.market.quote.Quote;
 import app.telemetry.market.quote.QuoteFetcher;
 
@@ -23,32 +22,32 @@ public final class WidgetRenderer {
 
     public static Bitmap render(
             int width, int height, float density, WidgetPrefs prefs,
-            List<Quote> quotes, Map<String, Bitmap> logos, Launch launch) {
-        return render(width, height, density, prefs, quotes, logos, launch, null, false);
+            List<Quote> quotes, Map<String, Bitmap> logos) {
+        return render(width, height, density, prefs, quotes, logos, null, false);
     }
 
     public static Bitmap render(
             int width, int height, float density, WidgetPrefs prefs,
-            List<Quote> quotes, Map<String, Bitmap> logos, Launch launch, Bitmap reuse) {
-        return render(width, height, density, prefs, quotes, logos, launch, reuse, "compact".equals(prefs.size));
+            List<Quote> quotes, Map<String, Bitmap> logos, Bitmap reuse) {
+        return render(width, height, density, prefs, quotes, logos, reuse, "compact".equals(prefs.size));
     }
 
     public static Bitmap render(
             int width, int height, float density, WidgetPrefs prefs,
-            List<Quote> quotes, Map<String, Bitmap> logos, Launch launch, Bitmap reuse, boolean halfBar) {
-        return render(width, height, density, prefs, quotes, logos, launch, reuse, halfBar, 0f);
+            List<Quote> quotes, Map<String, Bitmap> logos, Bitmap reuse, boolean halfBar) {
+        return render(width, height, density, prefs, quotes, logos, reuse, halfBar, 0f);
     }
 
     public static Bitmap render(
             int width, int height, float density, WidgetPrefs prefs,
-            List<Quote> quotes, Map<String, Bitmap> logos, Launch launch, Bitmap reuse, boolean halfBar,
+            List<Quote> quotes, Map<String, Bitmap> logos, Bitmap reuse, boolean halfBar,
             float marqueeOffset) {
-        return render(width, height, density, prefs, quotes, logos, launch, reuse, halfBar, marqueeOffset, false);
+        return render(width, height, density, prefs, quotes, logos, reuse, halfBar, marqueeOffset, false);
     }
 
     public static Bitmap render(
             int width, int height, float density, WidgetPrefs prefs,
-            List<Quote> quotes, Map<String, Bitmap> logos, Launch launch, Bitmap reuse, boolean halfBar,
+            List<Quote> quotes, Map<String, Bitmap> logos, Bitmap reuse, boolean halfBar,
             float marqueeOffset, boolean liveTape) {
         int w = Math.max(480, width);
         int h = Math.max(80, height);
@@ -82,13 +81,12 @@ public final class WidgetRenderer {
         boolean header = prefs.showHeader;
         boolean closed = QuoteFetcher.isClosedSession();
         boolean showMove = !(prefs.hideMoveWhenClosed && closed);
-        boolean ribbon = prefs.weekendMode && closed && launch != null;
 
         float gapY = compact ? 2.2f * dp : 5f * dp;
         float descent = pricePx * 0.34f;
         float bodyH = Math.max(logo, symbolPx) + sparkH + gapY + pricePx + descent
                 + (showMove ? pctPx + 6f * dp : 8f * dp);
-        float headH = (header || ribbon) ? headerPx + gap * 1.6f : 0;
+        float headH = header ? headerPx + gap * 1.6f : 0;
         float avail = h - pad * 2f - headH - 4f;
         if (halfBar) avail = Math.min(avail, h * 0.50f - pad * 2f - headH);
         if (avail > 40 && bodyH > avail) {
@@ -126,10 +124,7 @@ public final class WidgetRenderer {
         if ("center".equals(prefs.alignV)) bodyTop += extraY / 2f;
         else if ("bottom".equals(prefs.alignV)) bodyTop += extraY;
 
-        if (ribbon) {
-            Paint text = paint(Color.rgb(46, 230, 198), headerPx, "medium", dark);
-            c.drawText(launch.rocketShort() + "  " + launch.shortMission(), left, top + pad + headerPx, text);
-        } else if (header) {
+        if (header) {
             Paint text = paint(fg, headerPx, "medium", dark);
             c.drawText("MARKET TELEMETRY", left, top + pad + headerPx, text);
             Paint meta = paint(muted, headerPx, "regular", dark);

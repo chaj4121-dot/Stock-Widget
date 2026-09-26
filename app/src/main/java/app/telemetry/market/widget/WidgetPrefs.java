@@ -24,7 +24,6 @@ public final class WidgetPrefs {
     public String cornerStyle = "round";
     public String fontWeight = "bold";
     public boolean hideMoveWhenClosed = true;
-    public boolean weekendMode = true;
     public String textTone = "light";
     public boolean showDividers = true;
     public float marqueeSpeed = 1f;
@@ -63,7 +62,6 @@ public final class WidgetPrefs {
             p.cornerStyle = o.optString("cornerStyle", "round");
             p.fontWeight = o.optString("fontWeight", "bold");
             p.hideMoveWhenClosed = o.optBoolean("hideMoveWhenClosed", true);
-            p.weekendMode = o.optBoolean("weekendMode", true);
             p.textTone = o.optString("textTone", "light");
             p.showDividers = o.optBoolean("showDividers", true);
             p.alignH = o.optString("alignH", "left");
@@ -96,7 +94,6 @@ public final class WidgetPrefs {
             o.put("cornerStyle", cornerStyle);
             o.put("fontWeight", fontWeight);
             o.put("hideMoveWhenClosed", hideMoveWhenClosed);
-            o.put("weekendMode", weekendMode);
             o.put("textTone", textTone);
             o.put("showDividers", showDividers);
             o.put("alignH", alignH);
@@ -140,6 +137,31 @@ public final class WidgetPrefs {
 
     public static void putMarqueeAt(Context ctx, int appWidgetId, long at) {
         prefs(ctx).edit().putLong("off_t_" + appWidgetId, at).apply();
+    }
+
+
+    public static final int[] REFRESH_CHOICES = {1, 2, 5, 10, 15, 30, 60};
+
+    public static int refreshMinutes(Context ctx) {
+        int m = prefs(ctx).getInt("refreshMin", 5);
+        for (int v : REFRESH_CHOICES) if (v == m) return v;
+        return 5;
+    }
+
+    public static int refreshIndex(int minutes) {
+        for (int i = 0; i < REFRESH_CHOICES.length; i++) {
+            if (REFRESH_CHOICES[i] == minutes) return i;
+        }
+        return 2;
+    }
+
+    public static String refreshLabel(int minutes) {
+        if (minutes >= 60) return "시세 갱신 " + (minutes / 60) + "시간";
+        return "시세 갱신 " + minutes + "분";
+    }
+
+    public static void saveRefreshMinutes(Context ctx, int minutes) {
+        prefs(ctx).edit().putInt("refreshMin", minutes).apply();
     }
 
     private static String key(int id) {

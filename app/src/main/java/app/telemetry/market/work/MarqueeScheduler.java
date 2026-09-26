@@ -93,7 +93,7 @@ public final class MarqueeScheduler {
                         start = now;
                         WidgetPrefs.putMarqueeStart(context, id, start);
                     }
-                    float pxPerSec = DP_PER_SEC * density * Math.max(0.25f, prefs.marqueeSpeed);
+                    float pxPerSec = DP_PER_SEC * density * Math.max(0.1f, prefs.marqueeSpeed);
                     float offset = (float) (((now - start) / 1000.0) * pxPerSec);
                     WidgetPrefs.putOffset(context, id, offset);
                     TelemetryWidgetProvider.updateOne(context, mgr, id, false);

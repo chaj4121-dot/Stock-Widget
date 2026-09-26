@@ -21,7 +21,8 @@ import app.telemetry.market.quote.QuoteFetcher;
 public final class TapeComposer {
     public static final float BASE_DP_PER_SEC = 160f;
     public static final int[] DURATIONS_MS = {
-            700, 1000, 1400, 2000, 2800, 4000, 5600, 8000, 11000, 16000
+            700, 1000, 1400, 2000, 2800, 4000, 5600, 8000, 11000, 16000,
+            24000, 36000, 52000, 80000, 120000, 180000, 240000
     };
 
     public static final class Tape {
@@ -53,7 +54,14 @@ public final class TapeComposer {
             case 5600: return app.telemetry.market.R.layout.tape_host_5600;
             case 8000: return app.telemetry.market.R.layout.tape_host_8000;
             case 11000: return app.telemetry.market.R.layout.tape_host_11000;
-            default: return app.telemetry.market.R.layout.tape_host_16000;
+            case 16000: return app.telemetry.market.R.layout.tape_host_16000;
+            case 24000: return app.telemetry.market.R.layout.tape_host_24000;
+            case 36000: return app.telemetry.market.R.layout.tape_host_36000;
+            case 52000: return app.telemetry.market.R.layout.tape_host_52000;
+            case 80000: return app.telemetry.market.R.layout.tape_host_80000;
+            case 120000: return app.telemetry.market.R.layout.tape_host_120000;
+            case 180000: return app.telemetry.market.R.layout.tape_host_180000;
+            default: return app.telemetry.market.R.layout.tape_host_240000;
         }
     }
 
@@ -109,7 +117,7 @@ public final class TapeComposer {
             }
         }
 
-        float speed = BASE_DP_PER_SEC * dp * clamp(prefs.marqueeSpeed, 0.25f, 4f);
+        float speed = BASE_DP_PER_SEC * dp * clamp(prefs.marqueeSpeed, 0.1f, 4f);
         Tape tape = new Tape();
         tape.bitmap = bitmap;
         tape.widthPx = full;
@@ -117,8 +125,7 @@ public final class TapeComposer {
         tape.durationMs = nearest(Math.round(periodPx / Math.max(40f, speed) * 1000f));
         float headerPx = 9f * dp * tickerS;
         boolean header = prefs.showHeader;
-        boolean ribbon = prefs.weekendMode && QuoteFetcher.isClosedSession();
-        tape.padTopPx = (header || ribbon) ? Math.round(headerPx + 6f * dp) : 0;
+        tape.padTopPx = header ? Math.round(headerPx + 6f * dp) : 0;
         return tape;
     }
 

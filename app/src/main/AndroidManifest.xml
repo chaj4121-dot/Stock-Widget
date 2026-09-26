@@ -34,11 +34,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".launch.WeekendActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Telemetry" />
-
         <receiver
             android:name=".widget.TelemetryWidgetProvider"
             android:exported="true"
@@ -70,6 +65,14 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="app.telemetry.market.MARQUEE_TICK" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".work.QuoteScheduler$RefreshReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="app.telemetry.market.QUOTE_REFRESH" />
             </intent-filter>
         </receiver>
 
