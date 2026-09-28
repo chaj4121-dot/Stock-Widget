@@ -8,12 +8,11 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 /**
- * US session badge. Times are Korea local. Pre and overnight show time until
- * the cash open. Regular hours show the close. After-hours show the after end.
+ * US session badge. Pre and overnight show time until the cash open.
+ * Regular hours and after-hours show time left until that session ends.
  */
 public final class SessionClock {
     private static final ZoneId NY = ZoneId.of("America/New_York");
-    private static final ZoneId KR = ZoneId.of("Asia/Seoul");
 
     public static final class Badge {
         public final String tag;
@@ -44,10 +43,10 @@ public final class SessionClock {
             return new Badge("OPENS", remain(Duration.between(now, open)));
         }
         if (!now.isBefore(open) && now.isBefore(close)) {
-            return new Badge("CLOSES", krTime(close));
+            return new Badge("CLOSES", remain(Duration.between(now, close)));
         }
         if (!now.isBefore(close) && now.isBefore(afterEnd)) {
-            return new Badge("AFTER", krTime(afterEnd));
+            return new Badge("AFTER", remain(Duration.between(now, afterEnd)));
         }
         return new Badge("OPENS", remain(Duration.between(now, nextOpen(now))));
     }
@@ -77,10 +76,5 @@ public final class SessionClock {
         if (days > 0) return hours == 0 ? days + "d " + m + "m" : days + "d " + hours + "h";
         if (hours > 0) return m == 0 ? hours + "h" : hours + "h " + m + "m";
         return mins + "m";
-    }
-
-    private static String krTime(ZonedDateTime ny) {
-        ZonedDateTime kr = ny.withZoneSameInstant(KR);
-        return String.format("%02d:%02d KST", kr.getHour(), kr.getMinute());
     }
 }
