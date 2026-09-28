@@ -26,7 +26,8 @@ public final class WidgetPrefs {
     public boolean hideMoveWhenClosed = true;
     public boolean showSessionClock = true;
     public float clockScale = 1f;
-    public boolean hideDecimals = false;
+    public float clockShift = 0.35f;
+    public int decimals = 2;
     public String textTone = "light";
     public boolean showDividers = true;
     public float marqueeSpeed = 1f;
@@ -67,7 +68,10 @@ public final class WidgetPrefs {
             p.hideMoveWhenClosed = o.optBoolean("hideMoveWhenClosed", true);
             p.showSessionClock = o.optBoolean("showSessionClock", true);
             p.clockScale = (float) o.optDouble("clockScale", 1);
-            p.hideDecimals = o.optBoolean("hideDecimals", false);
+            p.clockShift = (float) o.optDouble("clockShift", 0.35);
+            if (o.has("decimals")) p.decimals = o.optInt("decimals", 2);
+            else if (o.optBoolean("hideDecimals", false)) p.decimals = 0;
+            else p.decimals = 2;
             p.textTone = o.optString("textTone", "light");
             p.showDividers = o.optBoolean("showDividers", true);
             p.alignH = o.optString("alignH", "left");
@@ -102,7 +106,8 @@ public final class WidgetPrefs {
             o.put("hideMoveWhenClosed", hideMoveWhenClosed);
             o.put("showSessionClock", showSessionClock);
             o.put("clockScale", clockScale);
-            o.put("hideDecimals", hideDecimals);
+            o.put("clockShift", clockShift);
+            o.put("decimals", decimals);
             o.put("textTone", textTone);
             o.put("showDividers", showDividers);
             o.put("alignH", alignH);

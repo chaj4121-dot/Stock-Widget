@@ -153,7 +153,11 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
             views.setImageViewBitmap(R.id.widget_bitmap, bmp);
             views.removeAllViews(R.id.widget_tape_slot);
             if (flow && prefs.showSessionClock) {
-                views.setImageViewBitmap(R.id.widget_clock, WidgetRenderer.clockBitmap(prefs, density));
+                Bitmap clock = WidgetRenderer.clockBitmap(prefs, density);
+                views.setImageViewBitmap(R.id.widget_clock, clock);
+                int room = Math.max(0, h - (clock == null ? 0 : clock.getHeight()));
+                int shift = Math.round(Math.max(0f, Math.min(1f, prefs.clockShift)) * room);
+                views.setViewPadding(R.id.widget_clock, 0, shift, 0, 0);
                 views.setViewVisibility(R.id.widget_clock, View.VISIBLE);
             } else {
                 views.setViewVisibility(R.id.widget_clock, View.GONE);

@@ -87,7 +87,7 @@ public final class TapeComposer {
         float unitW = 0f;
         for (int i = 0; i < tickers.length; i++) {
             unitW += segmentWidth(tickers[i], quoteOf(quotes, tickers[i], i), symbolPx, pricePx, pctSize,
-                    prefs.fontWeight, dark, dp, logoS, showMove, prefs.hideDecimals);
+                    prefs.fontWeight, dark, dp, logoS, showMove, prefs.decimals);
         }
         if (unitW < 8f) unitW = 8f;
 
@@ -112,7 +112,7 @@ public final class TapeComposer {
                     String symbol = tickers[i] == null ? "—" : tickers[i];
                     x = drawSegment(canvas, x, symbol, quoteOf(quotes, symbol, i), logos,
                             fg, upC, downC, symbolPx, pricePx, pctSize, prefs.fontWeight, dark, dp,
-                            logoS, baseline, showMove, prefs.hideDecimals);
+                            logoS, baseline, showMove, prefs.decimals);
                 }
             }
         }
@@ -131,14 +131,14 @@ public final class TapeComposer {
 
     private static float segmentWidth(
             String symbol, Quote q, float symbolPx, float pricePx, float pctSize,
-            String weight, boolean dark, float dp, float logoS, boolean showMove, boolean whole) {
+            String weight, boolean dark, float dp, float logoS, boolean showMove, int decimals) {
         Paint sym = paint(Color.WHITE, symbolPx, "medium", dark);
         Paint prc = paint(Color.WHITE, pricePx, weight, dark);
-        String priceTxt = WidgetRenderer.formatPrice(symbol, q == null ? 0 : q.price, whole);
+        String priceTxt = WidgetRenderer.formatPrice(symbol, q == null ? 0 : q.price, decimals);
         float w = sym.measureText(symbol == null ? "—" : symbol) + 8f * dp + prc.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
             boolean up = q.changePct >= 0;
-            String pctTxt = WidgetRenderer.formatMove(up, q.changePct, whole);
+            String pctTxt = WidgetRenderer.formatMove(up, q.changePct, decimals);
             Paint ch = paint(Color.WHITE, pctSize, "medium", dark);
             w += 8f * dp + ch.measureText(pctTxt);
         }
@@ -150,7 +150,7 @@ public final class TapeComposer {
     private static float drawSegment(
             Canvas c, float x, String symbol, Quote q, Map<String, Bitmap> logos,
             int fg, int upC, int downC, float symbolPx, float pricePx, float pctSize,
-            String weight, boolean dark, float dp, float logoS, float baseline, boolean showMove, boolean whole) {
+            String weight, boolean dark, float dp, float logoS, float baseline, boolean showMove, int decimals) {
         if (logoS > 0f) {
             Bitmap lg = logos == null ? null : logos.get(symbol);
             if (lg != null && !lg.isRecycled()) {
@@ -162,13 +162,13 @@ public final class TapeComposer {
         Paint sym = paint(fg, symbolPx, "medium", dark);
         c.drawText(symbol, x, baseline, sym);
         x += sym.measureText(symbol) + 8f * dp;
-        String priceTxt = WidgetRenderer.formatPrice(symbol, q == null ? 0 : q.price, whole);
+        String priceTxt = WidgetRenderer.formatPrice(symbol, q == null ? 0 : q.price, decimals);
         Paint prc = paint(fg, pricePx, weight, dark);
         c.drawText(priceTxt, x, baseline, prc);
         x += prc.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
             boolean up = q.changePct >= 0;
-            String pctTxt = WidgetRenderer.formatMove(up, q.changePct, whole);
+            String pctTxt = WidgetRenderer.formatMove(up, q.changePct, decimals);
             Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
             x += 8f * dp;
             c.drawText(pctTxt, x, baseline, ch);

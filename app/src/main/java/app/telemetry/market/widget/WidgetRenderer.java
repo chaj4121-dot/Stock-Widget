@@ -140,7 +140,7 @@ public final class WidgetRenderer {
             if (!liveTape) {
                 drawMarqueeStrip(c, quotes, logos, prefs, left, right, bodyTop, h,
                         fg, upC, downC, dark, dp, symbolPx, pricePx, marqueeOffset);
-                drawPinnedClock(c, prefs, edge, top, dp, dark);
+                drawPinnedClock(c, prefs, edge, h, dp, dark);
             }
             return bmp;
         }
@@ -169,8 +169,8 @@ public final class WidgetRenderer {
                 Paint mp = paint(fg, prcPx, prefs.fontWeight, dark);
                 boolean upv = q != null && q.changePct >= 0;
                 Paint mc = paint(upv ? upC : downC, pctPxW, "medium", dark);
-                String pTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
-                String cTxt = formatMove(upv, q == null ? 0 : q.changePct, prefs.hideDecimals);
+                String pTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
+                String cTxt = formatMove(upv, q == null ? 0 : q.changePct, prefs.decimals);
                 float gapw = 8f * dp;
                 float need = (logoSz > 0 ? logoSz + gapw : 0) + mt.measureText(symbol) + gapw
                         + mp.measureText(pTxt) + (showMove && q != null && q.price > 0 ? gapw + mc.measureText(cTxt) : 0);
@@ -178,7 +178,7 @@ public final class WidgetRenderer {
                 drawWideCol(c, q, symbol, x + colW2 * 0.04f, yBase, colW2 * 0.92f, prefs, showMove,
                         fg, upC, downC, dark, dp, symPx * f, prcPx * f, pctPxW * f, logoBmp, logoSz * f);
             }
-            drawPinnedClock(c, prefs, edge, top, dp, dark);
+            drawPinnedClock(c, prefs, edge, h, dp, dark);
             return bmp;
         }
 
@@ -197,7 +197,7 @@ public final class WidgetRenderer {
             drawCol(c, q, symbol, x + colW * 0.05f, bodyTop, colW * 0.90f, prefs, spark, showMove,
                     fg, upC, downC, dark, dp, symbolPx, pricePx, pctPx, logoBmp, logo, sparkH);
         }
-        drawPinnedClock(c, prefs, edge, top, dp, dark);
+        drawPinnedClock(c, prefs, edge, h, dp, dark);
         return bmp;
     }
 
@@ -263,8 +263,8 @@ public final class WidgetRenderer {
             float symbolPx, float pricePx, float pctPx, Bitmap logo, float logoSize, float sparkH) {
         boolean up = q != null && q.changePct >= 0;
         int tone = up ? upC : downC;
-        String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
-        String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.hideDecimals);
+        String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
+        String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
         Paint t = paint(fg, symbolPx, "medium", dark);
         Paint price = paint(fg, pricePx, prefs.fontWeight, dark);
         Paint ch = paint(tone, pctPx, "medium", dark);
@@ -308,8 +308,8 @@ public final class WidgetRenderer {
         Paint t = paint(fg, symPx, "medium", dark);
         Paint price = paint(fg, prcPx, prefs.fontWeight, dark);
         Paint ch = paint(up ? upC : downC, pctPx, "medium", dark);
-        String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
-        String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.hideDecimals);
+        String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
+        String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
         float gap = 8f * dp;
         float logoW = (logo != null && prefs.showLogos) ? logoSize : 0;
         float block = logoW + (logoW > 0 ? gap : 0) + t.measureText(symbol) + gap
@@ -351,8 +351,8 @@ public final class WidgetRenderer {
             String symbol = prefs.tickers[i];
             Quote q = quoteOf(quotes, symbol, i);
             boolean up = q != null && q.changePct >= 0;
-            String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
-            String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.hideDecimals);
+            String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
+            String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
             Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
             float w = sym.measureText(symbol) + 8f * dp + prc.measureText(priceTxt)
                     + 8f * dp + ch.measureText(pctTxt) + segPad;
@@ -372,8 +372,8 @@ public final class WidgetRenderer {
                 String symbol = prefs.tickers[i];
                 Quote q = quoteOf(quotes, symbol, i);
                 boolean up = q != null && q.changePct >= 0;
-                String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
-                String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.hideDecimals);
+                String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
+                String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
                 Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
                 Bitmap lg = logos == null ? null : logos.get(symbol);
                 if (lg != null && prefs.showLogos) {
@@ -431,7 +431,7 @@ public final class WidgetRenderer {
     }
 
     private static void drawPinnedClock(
-            Canvas c, WidgetPrefs prefs, float edge, float boxTop, float dp, boolean dark) {
+            Canvas c, WidgetPrefs prefs, float edge, float height, float dp, boolean dark) {
         if (!prefs.showSessionClock) return;
         SessionClock.Badge b = SessionClock.badge();
         float size = clockSize(prefs, dp);
@@ -439,7 +439,9 @@ public final class WidgetRenderer {
         Paint val = clockValue(size, dark);
         float gap = 4f * dp;
         float width = tag.measureText(b.tag) + gap + val.measureText(b.value);
-        drawClockText(c, b, edge - width, boxTop + size + dp, gap, tag, val);
+        float shift = Math.max(0f, Math.min(1f, prefs.clockShift));
+        float baseline = shift * Math.max(0f, height - size - 2f * dp) + size + dp;
+        drawClockText(c, b, edge - width, baseline, gap, tag, val);
     }
 
     private static Paint paint(int color, float size, String weight, boolean dark) {
@@ -460,18 +462,20 @@ public final class WidgetRenderer {
         return t;
     }
 
-    static String formatPrice(String symbol, double price, boolean whole) {
+    static String formatPrice(String symbol, double price, int decimals) {
         if (price <= 0) return "—";
+        int d = decimals <= 0 ? 0 : decimals == 1 ? 1 : 2;
         String s = symbol == null ? "" : symbol.toUpperCase(Locale.US);
         if (s.equals("^TNX") || s.equals("^TYX") || s.equals("^IRX") || s.equals("^FVX")) {
-            return String.format(Locale.US, "%.3f%%", price);
+            return String.format(Locale.US, "%." + d + "f%%", price);
         }
-        if (s.startsWith("^")) return String.format(Locale.US, whole ? "%,.0f" : "%,.2f", price);
-        return String.format(Locale.US, whole ? "$%,.0f" : "$%,.2f", price);
+        if (s.startsWith("^")) return String.format(Locale.US, "%,." + d + "f", price);
+        return String.format(Locale.US, "$%,." + d + "f", price);
     }
 
-    static String formatMove(boolean up, double pct, boolean whole) {
-        return (up ? "▲ " : "▼ ") + String.format(Locale.US, whole ? "%.0f%%" : "%.2f%%", Math.abs(pct));
+    static String formatMove(boolean up, double pct, int decimals) {
+        int d = decimals <= 0 ? 0 : decimals == 1 ? 1 : 2;
+        return (up ? "▲ " : "▼ ") + String.format(Locale.US, "%." + d + "f%%", Math.abs(pct));
     }
 
     private static void drawSpark(Canvas c, float[] values, float x, float y, float w, float h, int color) {

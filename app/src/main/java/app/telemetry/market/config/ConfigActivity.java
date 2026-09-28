@@ -157,11 +157,16 @@ public class ConfigActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.logos)).setChecked(prefs.showLogos);
         ((CheckBox) findViewById(R.id.hide_move)).setChecked(prefs.hideMoveWhenClosed);
         ((CheckBox) findViewById(R.id.session_clock)).setChecked(prefs.showSessionClock);
-        ((CheckBox) findViewById(R.id.hide_decimals)).setChecked(prefs.hideDecimals);
         SeekBar clock = findViewById(R.id.clock_scale);
         clock.setProgress(Math.round((prefs.clockScale - 0.7f) * 100f));
         ((TextView) findViewById(R.id.clock_label)).setText(
                 String.format(Locale.US, "장 시간 글씨 %d%%", Math.round(prefs.clockScale * 100)));
+        SeekBar shift = findViewById(R.id.clock_shift);
+        shift.setProgress(Math.round(prefs.clockShift * 100f));
+        ((TextView) findViewById(R.id.clock_shift_label)).setText(clockShiftLabel(prefs.clockShift));
+        if (prefs.decimals <= 0) ((RadioButton) findViewById(R.id.dec_0)).setChecked(true);
+        else if (prefs.decimals == 1) ((RadioButton) findViewById(R.id.dec_1)).setChecked(true);
+        else ((RadioButton) findViewById(R.id.dec_2)).setChecked(true);
         ((CheckBox) findViewById(R.id.border)).setChecked(prefs.showBorder);
         ((CheckBox) findViewById(R.id.sparklines)).setChecked(prefs.showSparklines);
         ((CheckBox) findViewById(R.id.dividers)).setChecked(prefs.showDividers);
@@ -205,9 +210,9 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void bindPreviewListeners() {
         android.view.View.OnClickListener click = v -> refreshPreview();
-        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.hide_decimals, R.id.border, R.id.sparklines, R.id.dividers};
+        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
         for (int id : boxes) ((CheckBox) findViewById(id)).setOnClickListener(click);
-        int[] groups = {R.id.glass_style, R.id.glass_style2, R.id.size, R.id.tone, R.id.corner, R.id.weight, R.id.align_h, R.id.align_v};
+        int[] groups = {R.id.glass_style, R.id.glass_style2, R.id.size, R.id.tone, R.id.corner, R.id.weight, R.id.align_h, R.id.align_v, R.id.decimals};
         for (int id : groups) {
             ((RadioGroup) findViewById(id)).setOnCheckedChangeListener((g, i) -> {
                 if (g.getId() == R.id.glass_style && i != -1) {
@@ -233,6 +238,9 @@ public class ConfigActivity extends AppCompatActivity {
                 } else if (seekBar.getId() == R.id.clock_scale) {
                     ((TextView) findViewById(R.id.clock_label))
                             .setText(String.format(Locale.US, "장 시간 글씨 %d%%", 70 + progress));
+                } else if (seekBar.getId() == R.id.clock_shift) {
+                    ((TextView) findViewById(R.id.clock_shift_label))
+                            .setText(clockShiftLabel(progress / 100f));
                 } else if (seekBar.getId() == R.id.refresh_min) {
                     int minutes = WidgetPrefs.REFRESH_CHOICES[Math.max(0, Math.min(progress, WidgetPrefs.REFRESH_CHOICES.length - 1))];
                     ((TextView) findViewById(R.id.refresh_label)).setText(WidgetPrefs.refreshLabel(minutes));
@@ -250,6 +258,7 @@ public class ConfigActivity extends AppCompatActivity {
         ((SeekBar) findViewById(R.id.ticker_scale)).setOnSeekBarChangeListener(seek);
         ((SeekBar) findViewById(R.id.custom_opacity)).setOnSeekBarChangeListener(seek);
         ((SeekBar) findViewById(R.id.clock_scale)).setOnSeekBarChangeListener(seek);
+        ((SeekBar) findViewById(R.id.clock_shift)).setOnSeekBarChangeListener(seek);
         ((SeekBar) findViewById(R.id.refresh_min)).setOnSeekBarChangeListener(seek);
         ((EditText) findViewById(R.id.tickers)).addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
@@ -292,8 +301,11 @@ public class ConfigActivity extends AppCompatActivity {
         next.showLogos = ((CheckBox) findViewById(R.id.logos)).isChecked();
         next.hideMoveWhenClosed = ((CheckBox) findViewById(R.id.hide_move)).isChecked();
         next.showSessionClock = ((CheckBox) findViewById(R.id.session_clock)).isChecked();
-        next.hideDecimals = ((CheckBox) findViewById(R.id.hide_decimals)).isChecked();
         next.clockScale = 0.7f + ((SeekBar) findViewById(R.id.clock_scale)).getProgress() / 100f;
+        next.clockShift = ((SeekBar) findViewById(R.id.clock_shift)).getProgress() / 100f;
+        if (((RadioButton) findViewById(R.id.dec_0)).isChecked()) next.decimals = 0;
+        else if (((RadioButton) findViewById(R.id.dec_1)).isChecked()) next.decimals = 1;
+        else next.decimals = 2;
         next.showBorder = ((CheckBox) findViewById(R.id.border)).isChecked();
         next.showSparklines = ((CheckBox) findViewById(R.id.sparklines)).isChecked();
         next.showDividers = ((CheckBox) findViewById(R.id.dividers)).isChecked();
@@ -305,6 +317,13 @@ public class ConfigActivity extends AppCompatActivity {
         else next.alignV = "center";
         next.showSlogan = false;
         return next;
+    }
+
+    private static String clockShiftLabel(float shift) {
+        int pct = Math.round(Math.max(0f, Math.min(1f, shift)) * 100f);
+        if (pct <= 0) return "장 시간 높이 맨 위";
+        if (pct >= 100) return "장 시간 높이 맨 아래";
+        return "장 시간 높이 위에서 " + pct + "%";
     }
 
     private void refreshPreview() {

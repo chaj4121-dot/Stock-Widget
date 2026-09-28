@@ -325,12 +325,36 @@
             android:layout_height="wrap_content"
             android:max="120" />
 
-        <CheckBox
-            android:id="@+id/hide_decimals"
+        <TextView
+            android:id="@+id/clock_shift_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="소수점 숨김 (가격 · 등락률)"
-            android:textColor="@color/paper" />
+            android:layout_marginTop="8dp"
+            android:text="장 시간 높이 위에서 35%"
+            android:textColor="@color/steel" />
+
+        <SeekBar
+            android:id="@+id/clock_shift"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="소수점"
+            android:textColor="@color/steel" />
+
+        <RadioGroup
+            android:id="@+id/decimals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/dec_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="없음" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/dec_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="한 자리" android:textColor="@color/paper" />
+            <RadioButton android:id="@+id/dec_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="두 자리" android:textColor="@color/paper" />
+        </RadioGroup>
 
         <CheckBox
             android:id="@+id/border"
