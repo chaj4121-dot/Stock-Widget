@@ -326,6 +326,13 @@
             android:max="120" />
 
         <CheckBox
+            android:id="@+id/hide_decimals"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="소수점 숨김 (가격 · 등락률)"
+            android:textColor="@color/paper" />
+
+        <CheckBox
             android:id="@+id/border"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

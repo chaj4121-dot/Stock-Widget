@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import java.util.HashMap;
@@ -151,7 +152,12 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_telemetry);
             views.setImageViewBitmap(R.id.widget_bitmap, bmp);
             views.removeAllViews(R.id.widget_tape_slot);
-            views.setViewPadding(R.id.widget_tape_slot, 0, 0, WidgetRenderer.clockReservePx(prefs, density), 0);
+            if (flow && prefs.showSessionClock) {
+                views.setImageViewBitmap(R.id.widget_clock, WidgetRenderer.clockBitmap(prefs, density));
+                views.setViewVisibility(R.id.widget_clock, View.VISIBLE);
+            } else {
+                views.setViewVisibility(R.id.widget_clock, View.GONE);
+            }
             if (flow) {
                 int viewport = Math.max(1, w - Math.round(16f * density));
                 TapeComposer.Tape tape = TapeComposer.compose(prefs, quotes, logos, density, viewport, slim);

@@ -120,7 +120,7 @@ public final class WidgetRenderer {
 
         float left = pad;
         float edge = w - pad;
-        float right = edge - clockReservePx(prefs, dp);
+        float right = edge;
         float extraY = Math.max(0, contentH - pad * 2 - headH - bodyH);
         float bodyTop = top + pad + headH;
         if ("center".equals(prefs.alignV)) bodyTop += extraY / 2f;
@@ -140,8 +140,8 @@ public final class WidgetRenderer {
             if (!liveTape) {
                 drawMarqueeStrip(c, quotes, logos, prefs, left, right, bodyTop, h,
                         fg, upC, downC, dark, dp, symbolPx, pricePx, marqueeOffset);
+                drawPinnedClock(c, prefs, edge, top, dp, dark);
             }
-            drawPinnedClock(c, prefs, edge, top, dp, dark);
             return bmp;
         }
 
@@ -169,8 +169,8 @@ public final class WidgetRenderer {
                 Paint mp = paint(fg, prcPx, prefs.fontWeight, dark);
                 boolean upv = q != null && q.changePct >= 0;
                 Paint mc = paint(upv ? upC : downC, pctPxW, "medium", dark);
-                String pTxt = formatPrice(symbol, q == null ? 0 : q.price);
-                String cTxt = (upv ? "\u25B2 " : "\u25BC ") + String.format(Locale.US, "%.2f%%", q == null ? 0 : Math.abs(q.changePct));
+                String pTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
+                String cTxt = formatMove(upv, q == null ? 0 : q.changePct, prefs.hideDecimals);
                 float gapw = 8f * dp;
                 float need = (logoSz > 0 ? logoSz + gapw : 0) + mt.measureText(symbol) + gapw
                         + mp.measureText(pTxt) + (showMove && q != null && q.price > 0 ? gapw + mc.measureText(cTxt) : 0);
@@ -263,8 +263,8 @@ public final class WidgetRenderer {
             float symbolPx, float pricePx, float pctPx, Bitmap logo, float logoSize, float sparkH) {
         boolean up = q != null && q.changePct >= 0;
         int tone = up ? upC : downC;
-        String priceTxt = formatPrice(symbol, q == null ? 0 : q.price);
-        String pctTxt = (up ? "▲ " : "▼ ") + String.format(Locale.US, "%.2f%%", q == null ? 0 : Math.abs(q.changePct));
+        String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
+        String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.hideDecimals);
         Paint t = paint(fg, symbolPx, "medium", dark);
         Paint price = paint(fg, pricePx, prefs.fontWeight, dark);
         Paint ch = paint(tone, pctPx, "medium", dark);
@@ -308,8 +308,8 @@ public final class WidgetRenderer {
         Paint t = paint(fg, symPx, "medium", dark);
         Paint price = paint(fg, prcPx, prefs.fontWeight, dark);
         Paint ch = paint(up ? upC : downC, pctPx, "medium", dark);
-        String priceTxt = formatPrice(symbol, q == null ? 0 : q.price);
-        String pctTxt = (up ? "\u25B2 " : "\u25BC ") + String.format(Locale.US, "%.2f%%", q == null ? 0 : Math.abs(q.changePct));
+        String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
+        String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.hideDecimals);
         float gap = 8f * dp;
         float logoW = (logo != null && prefs.showLogos) ? logoSize : 0;
         float block = logoW + (logoW > 0 ? gap : 0) + t.measureText(symbol) + gap
@@ -351,8 +351,8 @@ public final class WidgetRenderer {
             String symbol = prefs.tickers[i];
             Quote q = quoteOf(quotes, symbol, i);
             boolean up = q != null && q.changePct >= 0;
-            String priceTxt = formatPrice(symbol, q == null ? 0 : q.price);
-            String pctTxt = (up ? "▲ " : "▼ ") + String.format(Locale.US, "%.2f%%", q == null ? 0 : Math.abs(q.changePct));
+            String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
+            String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.hideDecimals);
             Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
             float w = sym.measureText(symbol) + 8f * dp + prc.measureText(priceTxt)
                     + 8f * dp + ch.measureText(pctTxt) + segPad;
@@ -372,8 +372,8 @@ public final class WidgetRenderer {
                 String symbol = prefs.tickers[i];
                 Quote q = quoteOf(quotes, symbol, i);
                 boolean up = q != null && q.changePct >= 0;
-                String priceTxt = formatPrice(symbol, q == null ? 0 : q.price);
-                String pctTxt = (up ? "▲ " : "▼ ") + String.format(Locale.US, "%.2f%%", q == null ? 0 : Math.abs(q.changePct));
+                String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.hideDecimals);
+                String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.hideDecimals);
                 Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
                 Bitmap lg = logos == null ? null : logos.get(symbol);
                 if (lg != null && prefs.showLogos) {
@@ -393,10 +393,20 @@ public final class WidgetRenderer {
         }
     }
 
-    public static int clockReservePx(WidgetPrefs prefs, float density) {
-        if (prefs == null || !prefs.showSessionClock) return 0;
+    public static Bitmap clockBitmap(WidgetPrefs prefs, float density) {
+        if (prefs == null || !prefs.showSessionClock) return null;
         float dp = density <= 0 ? 3f : density;
-        return Math.round(chipWidth(prefs, dp) + 8f * dp);
+        boolean dark = prefs.darkText();
+        SessionClock.Badge b = SessionClock.badge();
+        float size = clockSize(prefs, dp);
+        Paint tag = clockTag(size, dark);
+        Paint val = clockValue(size, dark);
+        float gap = 4f * dp;
+        int width = Math.max(1, Math.round(tag.measureText(b.tag) + gap + val.measureText(b.value) + dp));
+        int height = Math.max(1, Math.round(size + 3f * dp));
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        drawClockText(new Canvas(bmp), b, 0f, size + dp, gap, tag, val);
+        return bmp;
     }
 
     private static float clockSize(WidgetPrefs prefs, float dp) {
@@ -404,13 +414,20 @@ public final class WidgetRenderer {
         return 11.5f * dp * Math.max(0.7f, Math.min(1.9f, scale));
     }
 
-    private static float chipWidth(WidgetPrefs prefs, float dp) {
-        SessionClock.Badge b = SessionClock.badge();
-        float size = clockSize(prefs, dp);
-        Paint tag = paint(Color.WHITE, size, "bold", false);
-        tag.setLetterSpacing(0.08f);
-        Paint val = paint(Color.WHITE, size, "medium", false);
-        return 16f * dp + tag.measureText(b.tag) + 5f * dp + val.measureText(b.value);
+    private static Paint clockTag(float size, boolean dark) {
+        Paint tag = paint(dark ? Color.rgb(140, 88, 12) : Color.rgb(255, 196, 92), size, "bold", dark);
+        tag.setLetterSpacing(0.04f);
+        return tag;
+    }
+
+    private static Paint clockValue(float size, boolean dark) {
+        return paint(dark ? Color.rgb(18, 26, 34) : Color.rgb(248, 251, 253), size, "medium", dark);
+    }
+
+    private static void drawClockText(
+            Canvas c, SessionClock.Badge b, float x, float baseline, float gap, Paint tag, Paint val) {
+        c.drawText(b.tag, x, baseline, tag);
+        c.drawText(b.value, x + tag.measureText(b.tag) + gap, baseline, val);
     }
 
     private static void drawPinnedClock(
@@ -418,30 +435,11 @@ public final class WidgetRenderer {
         if (!prefs.showSessionClock) return;
         SessionClock.Badge b = SessionClock.badge();
         float size = clockSize(prefs, dp);
-        int tagC = dark ? Color.rgb(140, 88, 12) : Color.rgb(255, 196, 92);
-        int valC = dark ? Color.rgb(18, 26, 34) : Color.rgb(248, 251, 253);
-        Paint tag = paint(tagC, size, "bold", dark);
-        tag.setLetterSpacing(0.08f);
-        Paint val = paint(valC, size, "medium", dark);
-        float gap = 5f * dp;
-        float padX = 8f * dp;
-        float width = chipWidth(prefs, dp);
-        float top = boxTop + 3f * dp;
-        float bottom = top + size + 7f * dp;
-        RectF box = new RectF(edge - width, top, edge, bottom);
-        float rad = (bottom - top) / 2f;
-        Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
-        bg.setColor(dark ? Color.argb(46, 255, 196, 92) : Color.argb(96, 6, 10, 16));
-        c.drawRoundRect(box, rad, rad, bg);
-        Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
-        stroke.setStyle(Paint.Style.STROKE);
-        stroke.setStrokeWidth(Math.max(1f, dp * 0.7f));
-        stroke.setColor(dark ? Color.argb(120, 140, 88, 12) : Color.argb(160, 255, 196, 92));
-        c.drawRoundRect(box, rad, rad, stroke);
-        float base = top + size + 2.1f * dp;
-        float x = box.left + padX;
-        c.drawText(b.tag, x, base, tag);
-        c.drawText(b.value, x + tag.measureText(b.tag) + gap, base, val);
+        Paint tag = clockTag(size, dark);
+        Paint val = clockValue(size, dark);
+        float gap = 4f * dp;
+        float width = tag.measureText(b.tag) + gap + val.measureText(b.value);
+        drawClockText(c, b, edge - width, boxTop + size + dp, gap, tag, val);
     }
 
     private static Paint paint(int color, float size, String weight, boolean dark) {
@@ -462,14 +460,18 @@ public final class WidgetRenderer {
         return t;
     }
 
-    static String formatPrice(String symbol, double price) {
+    static String formatPrice(String symbol, double price, boolean whole) {
         if (price <= 0) return "—";
         String s = symbol == null ? "" : symbol.toUpperCase(Locale.US);
         if (s.equals("^TNX") || s.equals("^TYX") || s.equals("^IRX") || s.equals("^FVX")) {
             return String.format(Locale.US, "%.3f%%", price);
         }
-        if (s.startsWith("^")) return String.format(Locale.US, "%,.2f", price);
-        return String.format(Locale.US, "$%,.2f", price);
+        if (s.startsWith("^")) return String.format(Locale.US, whole ? "%,.0f" : "%,.2f", price);
+        return String.format(Locale.US, whole ? "$%,.0f" : "$%,.2f", price);
+    }
+
+    static String formatMove(boolean up, double pct, boolean whole) {
+        return (up ? "▲ " : "▼ ") + String.format(Locale.US, whole ? "%.0f%%" : "%.2f%%", Math.abs(pct));
     }
 
     private static void drawSpark(Canvas c, float[] values, float x, float y, float w, float h, int color) {

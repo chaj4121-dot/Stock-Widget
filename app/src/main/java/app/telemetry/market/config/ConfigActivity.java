@@ -157,6 +157,7 @@ public class ConfigActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.logos)).setChecked(prefs.showLogos);
         ((CheckBox) findViewById(R.id.hide_move)).setChecked(prefs.hideMoveWhenClosed);
         ((CheckBox) findViewById(R.id.session_clock)).setChecked(prefs.showSessionClock);
+        ((CheckBox) findViewById(R.id.hide_decimals)).setChecked(prefs.hideDecimals);
         SeekBar clock = findViewById(R.id.clock_scale);
         clock.setProgress(Math.round((prefs.clockScale - 0.7f) * 100f));
         ((TextView) findViewById(R.id.clock_label)).setText(
@@ -204,7 +205,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void bindPreviewListeners() {
         android.view.View.OnClickListener click = v -> refreshPreview();
-        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
+        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.hide_decimals, R.id.border, R.id.sparklines, R.id.dividers};
         for (int id : boxes) ((CheckBox) findViewById(id)).setOnClickListener(click);
         int[] groups = {R.id.glass_style, R.id.glass_style2, R.id.size, R.id.tone, R.id.corner, R.id.weight, R.id.align_h, R.id.align_v};
         for (int id : groups) {
@@ -291,6 +292,7 @@ public class ConfigActivity extends AppCompatActivity {
         next.showLogos = ((CheckBox) findViewById(R.id.logos)).isChecked();
         next.hideMoveWhenClosed = ((CheckBox) findViewById(R.id.hide_move)).isChecked();
         next.showSessionClock = ((CheckBox) findViewById(R.id.session_clock)).isChecked();
+        next.hideDecimals = ((CheckBox) findViewById(R.id.hide_decimals)).isChecked();
         next.clockScale = 0.7f + ((SeekBar) findViewById(R.id.clock_scale)).getProgress() / 100f;
         next.showBorder = ((CheckBox) findViewById(R.id.border)).isChecked();
         next.showSparklines = ((CheckBox) findViewById(R.id.sparklines)).isChecked();
