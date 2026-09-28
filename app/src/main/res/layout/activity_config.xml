@@ -305,6 +305,13 @@
             android:textColor="@color/paper" />
 
         <CheckBox
+            android:id="@+id/session_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="흐름에 장 시간 (개장까지 · 마감 · 애프터 종료)"
+            android:textColor="@color/paper" />
+
+        <CheckBox
             android:id="@+id/border"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

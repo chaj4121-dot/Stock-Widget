@@ -156,6 +156,7 @@ public class ConfigActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.header)).setChecked(prefs.showHeader);
         ((CheckBox) findViewById(R.id.logos)).setChecked(prefs.showLogos);
         ((CheckBox) findViewById(R.id.hide_move)).setChecked(prefs.hideMoveWhenClosed);
+        ((CheckBox) findViewById(R.id.session_clock)).setChecked(prefs.showSessionClock);
         ((CheckBox) findViewById(R.id.border)).setChecked(prefs.showBorder);
         ((CheckBox) findViewById(R.id.sparklines)).setChecked(prefs.showSparklines);
         ((CheckBox) findViewById(R.id.dividers)).setChecked(prefs.showDividers);
@@ -199,7 +200,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void bindPreviewListeners() {
         android.view.View.OnClickListener click = v -> refreshPreview();
-        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.border, R.id.sparklines, R.id.dividers};
+        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
         for (int id : boxes) ((CheckBox) findViewById(id)).setOnClickListener(click);
         int[] groups = {R.id.glass_style, R.id.glass_style2, R.id.size, R.id.tone, R.id.corner, R.id.weight, R.id.align_h, R.id.align_v};
         for (int id : groups) {
@@ -281,6 +282,7 @@ public class ConfigActivity extends AppCompatActivity {
         next.showHeader = ((CheckBox) findViewById(R.id.header)).isChecked();
         next.showLogos = ((CheckBox) findViewById(R.id.logos)).isChecked();
         next.hideMoveWhenClosed = ((CheckBox) findViewById(R.id.hide_move)).isChecked();
+        next.showSessionClock = ((CheckBox) findViewById(R.id.session_clock)).isChecked();
         next.showBorder = ((CheckBox) findViewById(R.id.border)).isChecked();
         next.showSparklines = ((CheckBox) findViewById(R.id.sparklines)).isChecked();
         next.showDividers = ((CheckBox) findViewById(R.id.dividers)).isChecked();

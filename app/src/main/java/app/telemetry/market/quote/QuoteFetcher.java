@@ -87,7 +87,6 @@ public final class QuoteFetcher {
         double regular = meta.optDouble("regularMarketPrice", 0);
         if (regular <= 0) regular = meta.optDouble("chartPreviousClose", 0);
         if (regular <= 0) return null;
-        double prev = meta.optDouble("chartPreviousClose", meta.optDouble("previousClose", regular));
         JSONArray ts = result.optJSONArray("timestamp");
         JSONArray close = null;
         try {
@@ -113,10 +112,25 @@ public final class QuoteFetcher {
         else if (pre != null && regularP != null && now < regularP[0]) session = "PRE";
 
         double price = regular;
-        if ("PRE".equals(session) && pre != null && pre > 0) price = pre;
-        if ("POST".equals(session) && post != null && post > 0) price = post;
+        double fullDay = meta.optDouble("fulldayPrice", 0);
+        if ("PRE".equals(session) || "POST".equals(session)) {
+            double extended = "PRE".equals(session)
+                    ? (pre != null ? pre : 0)
+                    : (post != null ? post : 0);
+            boolean fullMoved = fullDay > 0
+                    && Math.abs(fullDay - regular) > Math.max(0.01, regular * 0.00005);
+            if (fullMoved) price = fullDay;
+            else if (extended > 0) price = extended;
+            else if (fullDay > 0) price = fullDay;
+        }
         if (price <= 0) return null;
-        double pct = prev == 0 ? 0 : (price - prev) / prev * 100.0;
+        // chartPreviousClose during pre-market is the close from two sessions ago
+        // (the 1d window still contains the previous cash session). Brokers mark
+        // the move against the last regular close, which is still regularMarketPrice
+        // until the cash open. After the close, rebuild that prior close from the
+        // official regular-session percent.
+        double baseline = "PRE".equals(session) ? regular : priorClose(meta, regular);
+        double pct = baseline <= 0 ? 0 : (price - baseline) / baseline * 100.0;
         if ("REGULAR".equals(session) && meta.has("regularMarketChangePercent")) {
             pct = meta.getDouble("regularMarketChangePercent");
         }
@@ -130,6 +144,17 @@ public final class QuoteFetcher {
                 meta.optDouble("fiftyTwoWeekHigh", 0),
                 meta.optDouble("fiftyTwoWeekLow", 0)
         );
+    }
+
+    private static double priorClose(JSONObject meta, double regular) {
+        if (meta.has("regularMarketChangePercent") && regular > 0) {
+            double rpct = meta.optDouble("regularMarketChangePercent");
+            double denom = 1.0 + rpct / 100.0;
+            if (denom > 0.2 && denom < 5) return regular / denom;
+        }
+        double chartPrev = meta.optDouble("chartPreviousClose", 0);
+        if (chartPrev > 0) return chartPrev;
+        return meta.optDouble("previousClose", regular);
     }
 
     private static long[] period(JSONObject periods, String key) {

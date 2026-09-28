@@ -16,6 +16,7 @@ import java.util.Map;
 
 import app.telemetry.market.quote.Quote;
 import app.telemetry.market.quote.QuoteFetcher;
+import app.telemetry.market.quote.SessionClock;
 
 public final class WidgetRenderer {
     private WidgetRenderer() {}
@@ -337,9 +338,13 @@ public final class WidgetRenderer {
         float logoS = prefs.showLogos ? symbolPx * 1.2f : 0;
         float segPad = 26f * dp;
         float logoPad = 6f * dp;
+        String clock = prefs.showSessionClock ? SessionClock.tapeText() : "";
+        boolean showClock = clock != null && !clock.isEmpty();
+        Paint clockPaint = paint(dark ? Color.rgb(146, 96, 16) : Color.rgb(255, 214, 120), symbolPx * 0.92f, "medium", dark);
+        float clockW = showClock ? clockPaint.measureText(clock) + 18f * dp + segPad : 0f;
 
         // 스트립 전체 폭 계산
-        float stripW = 0;
+        float stripW = clockW;
         float[] segW = new float[prefs.tickers.length];
         for (int i = 0; i < prefs.tickers.length; i++) {
             String symbol = prefs.tickers[i];
@@ -362,6 +367,18 @@ public final class WidgetRenderer {
         for (int pass = 0; pass < 2; pass++) {
             float cx = x0 + pass * stripW;
             if (cx > right) break;
+            if (showClock) {
+                float size = symbolPx * 0.92f;
+                float textW = clockPaint.measureText(clock);
+                float padX = 9f * dp;
+                float top = baseline - size * 0.92f;
+                float bottom = baseline + size * 0.22f;
+                Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
+                bg.setColor(dark ? Color.argb(36, 146, 96, 16) : Color.argb(52, 255, 214, 120));
+                c.drawRoundRect(new RectF(cx, top, cx + textW + padX * 2f, bottom), size * 0.45f, size * 0.45f, bg);
+                c.drawText(clock, cx + padX, baseline, clockPaint);
+                cx += clockW;
+            }
             for (int i = 0; i < prefs.tickers.length; i++) {
                 String symbol = prefs.tickers[i];
                 Quote q = quoteOf(quotes, symbol, i);
