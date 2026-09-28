@@ -119,7 +119,8 @@ public final class WidgetRenderer {
         int downC = dark ? Color.rgb(196, 52, 56) : Color.rgb(240, 113, 120);
 
         float left = pad;
-        float right = w - pad;
+        float edge = w - pad;
+        float right = edge - clockReservePx(prefs, dp);
         float extraY = Math.max(0, contentH - pad * 2 - headH - bodyH);
         float bodyTop = top + pad + headH;
         if ("center".equals(prefs.alignV)) bodyTop += extraY / 2f;
@@ -128,9 +129,11 @@ public final class WidgetRenderer {
         if (header) {
             Paint text = paint(fg, headerPx, "medium", dark);
             c.drawText("MARKET TELEMETRY", left, top + pad + headerPx, text);
-            Paint meta = paint(muted, headerPx, "regular", dark);
-            meta.setTextAlign(Paint.Align.RIGHT);
-            c.drawText(QuoteFetcher.sessionLabel() + "  " + QuoteFetcher.nyTime(), right, top + pad + headerPx, meta);
+            if (!prefs.showSessionClock) {
+                Paint meta = paint(muted, headerPx, "regular", dark);
+                meta.setTextAlign(Paint.Align.RIGHT);
+                c.drawText(QuoteFetcher.sessionLabel() + "  " + QuoteFetcher.nyTime(), edge, top + pad + headerPx, meta);
+            }
         }
 
         if (prefs.tickers.length > 4) {
@@ -138,6 +141,7 @@ public final class WidgetRenderer {
                 drawMarqueeStrip(c, quotes, logos, prefs, left, right, bodyTop, h,
                         fg, upC, downC, dark, dp, symbolPx, pricePx, marqueeOffset);
             }
+            drawPinnedClock(c, prefs, edge, top, dp, dark);
             return bmp;
         }
 
@@ -174,6 +178,7 @@ public final class WidgetRenderer {
                 drawWideCol(c, q, symbol, x + colW2 * 0.04f, yBase, colW2 * 0.92f, prefs, showMove,
                         fg, upC, downC, dark, dp, symPx * f, prcPx * f, pctPxW * f, logoBmp, logoSz * f);
             }
+            drawPinnedClock(c, prefs, edge, top, dp, dark);
             return bmp;
         }
 
@@ -192,6 +197,7 @@ public final class WidgetRenderer {
             drawCol(c, q, symbol, x + colW * 0.05f, bodyTop, colW * 0.90f, prefs, spark, showMove,
                     fg, upC, downC, dark, dp, symbolPx, pricePx, pctPx, logoBmp, logo, sparkH);
         }
+        drawPinnedClock(c, prefs, edge, top, dp, dark);
         return bmp;
     }
 
@@ -338,13 +344,8 @@ public final class WidgetRenderer {
         float logoS = prefs.showLogos ? symbolPx * 1.2f : 0;
         float segPad = 26f * dp;
         float logoPad = 6f * dp;
-        String clock = prefs.showSessionClock ? SessionClock.tapeText() : "";
-        boolean showClock = clock != null && !clock.isEmpty();
-        Paint clockPaint = paint(dark ? Color.rgb(146, 96, 16) : Color.rgb(255, 214, 120), symbolPx * 0.92f, "medium", dark);
-        float clockW = showClock ? clockPaint.measureText(clock) + 18f * dp + segPad : 0f;
 
-        // 스트립 전체 폭 계산
-        float stripW = clockW;
+        float stripW = 0;
         float[] segW = new float[prefs.tickers.length];
         for (int i = 0; i < prefs.tickers.length; i++) {
             String symbol = prefs.tickers[i];
@@ -367,18 +368,6 @@ public final class WidgetRenderer {
         for (int pass = 0; pass < 2; pass++) {
             float cx = x0 + pass * stripW;
             if (cx > right) break;
-            if (showClock) {
-                float size = symbolPx * 0.92f;
-                float textW = clockPaint.measureText(clock);
-                float padX = 9f * dp;
-                float top = baseline - size * 0.92f;
-                float bottom = baseline + size * 0.22f;
-                Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
-                bg.setColor(dark ? Color.argb(36, 146, 96, 16) : Color.argb(52, 255, 214, 120));
-                c.drawRoundRect(new RectF(cx, top, cx + textW + padX * 2f, bottom), size * 0.45f, size * 0.45f, bg);
-                c.drawText(clock, cx + padX, baseline, clockPaint);
-                cx += clockW;
-            }
             for (int i = 0; i < prefs.tickers.length; i++) {
                 String symbol = prefs.tickers[i];
                 Quote q = quoteOf(quotes, symbol, i);
@@ -402,6 +391,57 @@ public final class WidgetRenderer {
                 cx += ch.measureText(pctTxt) + segPad;
             }
         }
+    }
+
+    public static int clockReservePx(WidgetPrefs prefs, float density) {
+        if (prefs == null || !prefs.showSessionClock) return 0;
+        float dp = density <= 0 ? 3f : density;
+        return Math.round(chipWidth(prefs, dp) + 8f * dp);
+    }
+
+    private static float clockSize(WidgetPrefs prefs, float dp) {
+        float scale = prefs.clockScale <= 0 ? 1f : prefs.clockScale;
+        return 11.5f * dp * Math.max(0.7f, Math.min(1.9f, scale));
+    }
+
+    private static float chipWidth(WidgetPrefs prefs, float dp) {
+        SessionClock.Badge b = SessionClock.badge();
+        float size = clockSize(prefs, dp);
+        Paint tag = paint(Color.WHITE, size, "bold", false);
+        tag.setLetterSpacing(0.08f);
+        Paint val = paint(Color.WHITE, size, "medium", false);
+        return 16f * dp + tag.measureText(b.tag) + 5f * dp + val.measureText(b.value);
+    }
+
+    private static void drawPinnedClock(
+            Canvas c, WidgetPrefs prefs, float edge, float boxTop, float dp, boolean dark) {
+        if (!prefs.showSessionClock) return;
+        SessionClock.Badge b = SessionClock.badge();
+        float size = clockSize(prefs, dp);
+        int tagC = dark ? Color.rgb(140, 88, 12) : Color.rgb(255, 196, 92);
+        int valC = dark ? Color.rgb(18, 26, 34) : Color.rgb(248, 251, 253);
+        Paint tag = paint(tagC, size, "bold", dark);
+        tag.setLetterSpacing(0.08f);
+        Paint val = paint(valC, size, "medium", dark);
+        float gap = 5f * dp;
+        float padX = 8f * dp;
+        float width = chipWidth(prefs, dp);
+        float top = boxTop + 3f * dp;
+        float bottom = top + size + 7f * dp;
+        RectF box = new RectF(edge - width, top, edge, bottom);
+        float rad = (bottom - top) / 2f;
+        Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
+        bg.setColor(dark ? Color.argb(46, 255, 196, 92) : Color.argb(96, 6, 10, 16));
+        c.drawRoundRect(box, rad, rad, bg);
+        Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+        stroke.setStyle(Paint.Style.STROKE);
+        stroke.setStrokeWidth(Math.max(1f, dp * 0.7f));
+        stroke.setColor(dark ? Color.argb(120, 140, 88, 12) : Color.argb(160, 255, 196, 92));
+        c.drawRoundRect(box, rad, rad, stroke);
+        float base = top + size + 2.1f * dp;
+        float x = box.left + padX;
+        c.drawText(b.tag, x, base, tag);
+        c.drawText(b.value, x + tag.measureText(b.tag) + gap, base, val);
     }
 
     private static Paint paint(int color, float size, String weight, boolean dark) {

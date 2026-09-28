@@ -308,8 +308,22 @@
             android:id="@+id/session_clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="흐름에 장 시간 (개장까지 · 마감 · 애프터 종료)"
+            android:text="우측 상단 장 시간"
             android:textColor="@color/paper" />
+
+        <TextView
+            android:id="@+id/clock_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="장 시간 글씨 100%"
+            android:textColor="@color/steel" />
+
+        <SeekBar
+            android:id="@+id/clock_scale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="120" />
 
         <CheckBox
             android:id="@+id/border"

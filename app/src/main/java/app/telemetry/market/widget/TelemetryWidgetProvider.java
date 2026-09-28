@@ -151,6 +151,7 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_telemetry);
             views.setImageViewBitmap(R.id.widget_bitmap, bmp);
             views.removeAllViews(R.id.widget_tape_slot);
+            views.setViewPadding(R.id.widget_tape_slot, 0, 0, WidgetRenderer.clockReservePx(prefs, density), 0);
             if (flow) {
                 int viewport = Math.max(1, w - Math.round(16f * density));
                 TapeComposer.Tape tape = TapeComposer.compose(prefs, quotes, logos, density, viewport, slim);

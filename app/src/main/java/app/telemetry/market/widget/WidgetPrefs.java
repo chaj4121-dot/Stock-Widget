@@ -25,6 +25,7 @@ public final class WidgetPrefs {
     public String fontWeight = "bold";
     public boolean hideMoveWhenClosed = true;
     public boolean showSessionClock = true;
+    public float clockScale = 1f;
     public String textTone = "light";
     public boolean showDividers = true;
     public float marqueeSpeed = 1f;
@@ -64,6 +65,7 @@ public final class WidgetPrefs {
             p.fontWeight = o.optString("fontWeight", "bold");
             p.hideMoveWhenClosed = o.optBoolean("hideMoveWhenClosed", true);
             p.showSessionClock = o.optBoolean("showSessionClock", true);
+            p.clockScale = (float) o.optDouble("clockScale", 1);
             p.textTone = o.optString("textTone", "light");
             p.showDividers = o.optBoolean("showDividers", true);
             p.alignH = o.optString("alignH", "left");
@@ -97,6 +99,7 @@ public final class WidgetPrefs {
             o.put("fontWeight", fontWeight);
             o.put("hideMoveWhenClosed", hideMoveWhenClosed);
             o.put("showSessionClock", showSessionClock);
+            o.put("clockScale", clockScale);
             o.put("textTone", textTone);
             o.put("showDividers", showDividers);
             o.put("alignH", alignH);

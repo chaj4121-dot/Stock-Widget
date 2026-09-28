@@ -13,7 +13,6 @@ import java.util.Map;
 
 import app.telemetry.market.quote.Quote;
 import app.telemetry.market.quote.QuoteFetcher;
-import app.telemetry.market.quote.SessionClock;
 
 /**
  * One wide bitmap of the chyron, drawn twice so a -50% slide loops cleanly.
@@ -84,11 +83,8 @@ public final class TapeComposer {
         boolean wantLogo = prefs.showLogos;
         float logoS = wantLogo ? symbolPx * 1.2f : 0f;
 
-        String clock = prefs.showSessionClock ? SessionClock.tapeText() : "";
-        boolean showClock = clock != null && !clock.isEmpty();
         String[] tickers = prefs.tickers == null ? new String[0] : prefs.tickers;
         float unitW = 0f;
-        if (showClock) unitW += clockWidth(clock, symbolPx, dark, dp);
         for (int i = 0; i < tickers.length; i++) {
             unitW += segmentWidth(tickers[i], quoteOf(quotes, tickers[i], i), symbolPx, pricePx, pctSize,
                     prefs.fontWeight, dark, dp, logoS, showMove);
@@ -112,9 +108,6 @@ public final class TapeComposer {
             float start = copy * periodPx;
             x = start;
             for (int r = 0; r < reps; r++) {
-                if (showClock) {
-                    x = drawClock(canvas, x, clock, symbolPx, dark, dp, baseline);
-                }
                 for (int i = 0; i < tickers.length; i++) {
                     String symbol = tickers[i] == null ? "—" : tickers[i];
                     x = drawSegment(canvas, x, symbol, quoteOf(quotes, symbol, i), logos,
@@ -134,30 +127,6 @@ public final class TapeComposer {
         boolean header = prefs.showHeader;
         tape.padTopPx = header ? Math.round(headerPx + 6f * dp) : 0;
         return tape;
-    }
-
-    private static int clockColor(boolean dark) {
-        return dark ? Color.rgb(146, 96, 16) : Color.rgb(255, 214, 120);
-    }
-
-    private static float clockWidth(String clock, float symbolPx, boolean dark, float dp) {
-        Paint p = paint(clockColor(dark), symbolPx * 0.92f, "medium", dark);
-        return p.measureText(clock) + 18f * dp + 26f * dp;
-    }
-
-    private static float drawClock(
-            Canvas c, float x, String clock, float symbolPx, boolean dark, float dp, float baseline) {
-        float size = symbolPx * 0.92f;
-        Paint p = paint(clockColor(dark), size, "medium", dark);
-        float textW = p.measureText(clock);
-        float padX = 9f * dp;
-        float top = baseline - size * 0.92f;
-        float bottom = baseline + size * 0.22f;
-        Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
-        bg.setColor(dark ? Color.argb(36, 146, 96, 16) : Color.argb(52, 255, 214, 120));
-        c.drawRoundRect(new RectF(x, top, x + textW + padX * 2f, bottom), size * 0.45f, size * 0.45f, bg);
-        c.drawText(clock, x + padX, baseline, p);
-        return x + textW + padX * 2f + 26f * dp;
     }
 
     private static float segmentWidth(
