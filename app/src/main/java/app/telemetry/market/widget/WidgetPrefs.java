@@ -29,6 +29,7 @@ public final class WidgetPrefs {
     public float clockShift = 0.35f;
     public int decimals = 2;
     public String textTone = "light";
+    public boolean textHalo = true;
     public boolean showDividers = true;
     public float marqueeSpeed = 1f;
     public String alignH = "left";
@@ -73,6 +74,7 @@ public final class WidgetPrefs {
             else if (o.optBoolean("hideDecimals", false)) p.decimals = 0;
             else p.decimals = 2;
             p.textTone = o.optString("textTone", "light");
+            p.textHalo = o.optBoolean("textHalo", true);
             p.showDividers = o.optBoolean("showDividers", true);
             p.alignH = o.optString("alignH", "left");
             p.alignV = o.optString("alignV", "center");
@@ -109,6 +111,7 @@ public final class WidgetPrefs {
             o.put("clockShift", clockShift);
             o.put("decimals", decimals);
             o.put("textTone", textTone);
+            o.put("textHalo", textHalo);
             o.put("showDividers", showDividers);
             o.put("alignH", alignH);
             o.put("alignV", alignV);

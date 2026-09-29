@@ -68,6 +68,7 @@ public final class TapeComposer {
     public static Tape compose(
             WidgetPrefs prefs, List<Quote> quotes, Map<String, Bitmap> logos,
             float density, int viewWidthPx, boolean halfBar) {
+        TextInk.use(prefs.textHalo);
         float dp = density <= 0 ? 3f : density;
         float tickerS = clamp(prefs.tickerScale <= 0 ? 1.25f : prefs.tickerScale, 0.5f, 2.5f);
         float priceS = clamp(prefs.fontScale, 0.5f, 2.5f);
@@ -98,7 +99,7 @@ public final class TapeComposer {
         int full = periodPx * 2;
 
         float row = Math.max(logoS, Math.max(symbolPx, pricePx));
-        int height = Math.max(1, Math.round(row + 12f * dp));
+        int height = Math.max(1, Math.round(row + 9f * dp));
         float baseline = height - Math.max(3f * dp, pricePx * 0.28f);
 
         Bitmap bitmap = Bitmap.createBitmap(full, height, Bitmap.Config.ARGB_8888);

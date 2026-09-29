@@ -60,6 +60,7 @@ public final class WidgetRenderer {
             bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         }
         Canvas c = new Canvas(bmp);
+        TextInk.use(prefs.textHalo);
 
         boolean compact = halfBar || "compact".equals(prefs.size);
         boolean wideRow = (float) w / Math.max(1, h) >= 3.2f;
@@ -397,12 +398,13 @@ public final class WidgetRenderer {
         if (prefs == null || !prefs.showSessionClock) return null;
         float dp = density <= 0 ? 3f : density;
         boolean dark = prefs.darkText();
+        TextInk.use(prefs.textHalo);
         SessionClock.Badge b = SessionClock.badge();
         float size = clockSize(prefs, dp);
         Paint tag = clockTag(size, dark);
         Paint val = clockValue(size, dark);
         float gap = 4f * dp;
-        float pad = Math.max(3f * dp, size * 0.28f);
+        float pad = Math.max(2f * dp, size * 0.12f);
         int width = Math.max(1, Math.round(tag.measureText(b.tag) + gap + val.measureText(b.value) + pad));
         int height = Math.max(1, Math.round(size + pad));
         Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);

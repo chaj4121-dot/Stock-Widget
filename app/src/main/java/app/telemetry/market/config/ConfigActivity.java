@@ -155,6 +155,7 @@ public class ConfigActivity extends AppCompatActivity {
 
         ((CheckBox) findViewById(R.id.header)).setChecked(prefs.showHeader);
         ((CheckBox) findViewById(R.id.logos)).setChecked(prefs.showLogos);
+        ((CheckBox) findViewById(R.id.text_halo)).setChecked(prefs.textHalo);
         ((CheckBox) findViewById(R.id.hide_move)).setChecked(prefs.hideMoveWhenClosed);
         ((CheckBox) findViewById(R.id.session_clock)).setChecked(prefs.showSessionClock);
         SeekBar clock = findViewById(R.id.clock_scale);
@@ -210,7 +211,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void bindPreviewListeners() {
         android.view.View.OnClickListener click = v -> refreshPreview();
-        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
+        int[] boxes = {R.id.text_halo, R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
         for (int id : boxes) ((CheckBox) findViewById(id)).setOnClickListener(click);
         int[] groups = {R.id.glass_style, R.id.glass_style2, R.id.size, R.id.tone, R.id.corner, R.id.weight, R.id.align_h, R.id.align_v, R.id.decimals};
         for (int id : groups) {
@@ -299,6 +300,7 @@ public class ConfigActivity extends AppCompatActivity {
         next.marqueeSpeed = 0.1f + ((SeekBar) findViewById(R.id.marquee_speed)).getProgress() / 100f;
         next.showHeader = ((CheckBox) findViewById(R.id.header)).isChecked();
         next.showLogos = ((CheckBox) findViewById(R.id.logos)).isChecked();
+        next.textHalo = ((CheckBox) findViewById(R.id.text_halo)).isChecked();
         next.hideMoveWhenClosed = ((CheckBox) findViewById(R.id.hide_move)).isChecked();
         next.showSessionClock = ((CheckBox) findViewById(R.id.session_clock)).isChecked();
         next.clockScale = 0.7f + ((SeekBar) findViewById(R.id.clock_scale)).getProgress() / 100f;
