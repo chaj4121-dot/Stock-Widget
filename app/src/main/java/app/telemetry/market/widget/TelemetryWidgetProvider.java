@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 
 import app.telemetry.market.R;
 import app.telemetry.market.config.ConfigActivity;
+import app.telemetry.market.media.NowPlaying;
 import app.telemetry.market.quote.Quote;
 import app.telemetry.market.quote.QuoteCache;
 import app.telemetry.market.quote.QuoteFetcher;
@@ -73,6 +74,16 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
         for (int id : b) updateOne(context, manager, id, true);
         int[] c = manager.getAppWidgetIds(new ComponentName(context, Wide4WidgetProvider.class));
         for (int id : c) updateOne(context, manager, id, true);
+    }
+
+    public static void redraw(Context context) {
+        AppWidgetManager manager = AppWidgetManager.getInstance(context);
+        int[] a = manager.getAppWidgetIds(new ComponentName(context, TelemetryWidgetProvider.class));
+        for (int id : a) updateOne(context, manager, id, false);
+        int[] b = manager.getAppWidgetIds(new ComponentName(context, SlimWidgetProvider.class));
+        for (int id : b) updateOne(context, manager, id, false);
+        int[] c = manager.getAppWidgetIds(new ComponentName(context, Wide4WidgetProvider.class));
+        for (int id : c) updateOne(context, manager, id, false);
     }
 
     public static void updateOne(Context context, AppWidgetManager manager, int id) {
@@ -133,8 +144,26 @@ public class TelemetryWidgetProvider extends AppWidgetProvider {
             int w, int h, float density, WidgetPrefs prefs, List<Quote> quotes,
             PendingIntent cfgPi, boolean networkLogos, float marqueeOffset) {
         try {
+            pushBound(context, manager, id, w, h, density, prefs, quotes, cfgPi, networkLogos, marqueeOffset);
+        } finally {
+            NowPlaying.bind(null, null);
+        }
+    }
+
+    private static void pushBound(
+            Context context, AppWidgetManager manager, int id,
+            int w, int h, float density, WidgetPrefs prefs, List<Quote> quotes,
+            PendingIntent cfgPi, boolean networkLogos, float marqueeOffset) {
+        try {
             boolean flow = prefs.tickers.length > 4 && Build.VERSION.SDK_INT >= 31;
             boolean slim = halfBar(manager, id, prefs);
+            if (prefs.showNowPlaying) {
+                NowPlaying.Track track = NowPlaying.current(context);
+                int iconPx = flow
+                        ? TapeComposer.logoPx(prefs, density, slim)
+                        : Math.max(48, Math.round(28f * density));
+                NowPlaying.bind(track, track == null ? null : NowPlaying.icon(context, track.pkg, iconPx));
+            }
             Map<String, Bitmap> logos = new HashMap<>();
             if (prefs.showLogos) {
                 int size = flow

@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.provider.Settings;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -24,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import app.telemetry.market.R;
+import app.telemetry.market.media.NowPlaying;
 import app.telemetry.market.quote.Quote;
 import app.telemetry.market.quote.QuoteCache;
 import app.telemetry.market.quote.QuoteFetcher;
@@ -153,6 +156,7 @@ public class ConfigActivity extends AppCompatActivity {
         refresh.setProgress(WidgetPrefs.refreshIndex(refreshMin));
         ((TextView) findViewById(R.id.refresh_label)).setText(WidgetPrefs.refreshLabel(refreshMin));
 
+        ((CheckBox) findViewById(R.id.now_playing)).setChecked(prefs.showNowPlaying);
         ((CheckBox) findViewById(R.id.header)).setChecked(prefs.showHeader);
         ((CheckBox) findViewById(R.id.logos)).setChecked(prefs.showLogos);
         ((CheckBox) findViewById(R.id.hide_move)).setChecked(prefs.hideMoveWhenClosed);
@@ -209,8 +213,13 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void bindPreviewListeners() {
-        android.view.View.OnClickListener click = v -> refreshPreview();
-        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
+        android.view.View.OnClickListener click = v -> {
+            if (v.getId() == R.id.now_playing && ((CheckBox) v).isChecked() && !NowPlaying.listening(this)) {
+                startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+            }
+            refreshPreview();
+        };
+        int[] boxes = {R.id.now_playing, R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
         for (int id : boxes) ((CheckBox) findViewById(id)).setOnClickListener(click);
         int[] groups = {R.id.glass_style, R.id.glass_style2, R.id.size, R.id.tone, R.id.corner, R.id.weight, R.id.align_h, R.id.align_v, R.id.decimals};
         for (int id : groups) {
@@ -260,6 +269,8 @@ public class ConfigActivity extends AppCompatActivity {
         ((SeekBar) findViewById(R.id.clock_scale)).setOnSeekBarChangeListener(seek);
         ((SeekBar) findViewById(R.id.clock_shift)).setOnSeekBarChangeListener(seek);
         ((SeekBar) findViewById(R.id.refresh_min)).setOnSeekBarChangeListener(seek);
+        ((Button) findViewById(R.id.now_playing_access)).setOnClickListener(v ->
+                startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)));
         ((EditText) findViewById(R.id.tickers)).addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
             @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
@@ -297,6 +308,7 @@ public class ConfigActivity extends AppCompatActivity {
         next.fontScale = 0.8f + ((SeekBar) findViewById(R.id.font_scale)).getProgress() / 100f;
         next.tickerScale = 0.8f + ((SeekBar) findViewById(R.id.ticker_scale)).getProgress() / 100f;
         next.marqueeSpeed = 0.1f + ((SeekBar) findViewById(R.id.marquee_speed)).getProgress() / 100f;
+        next.showNowPlaying = ((CheckBox) findViewById(R.id.now_playing)).isChecked();
         next.showHeader = ((CheckBox) findViewById(R.id.header)).isChecked();
         next.showLogos = ((CheckBox) findViewById(R.id.logos)).isChecked();
         next.hideMoveWhenClosed = ((CheckBox) findViewById(R.id.hide_move)).isChecked();
@@ -341,12 +353,18 @@ public class ConfigActivity extends AppCompatActivity {
         }
         Map<String, Bitmap> logos = prefs.showLogos ? previewLogos : new HashMap<>();
         float density = getResources().getDisplayMetrics().density;
+        NowPlaying.Track track = prefs.showNowPlaying ? NowPlaying.current(this) : null;
+        NowPlaying.bind(track, track == null ? null : NowPlaying.icon(this, track.pkg, Math.round(36f * density)));
         ImageView iv = findViewById(R.id.preview);
         int w = iv.getWidth() > 80 ? iv.getWidth() : Math.max(720, Math.round(getResources().getDisplayMetrics().widthPixels * 0.92f));
         int h = Math.max(iv.getHeight(), Math.round(150 * density));
         boolean half = "compact".equals(prefs.size);
-        previewBmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos, previewBmp, half);
-        iv.setImageBitmap(previewBmp);
+        try {
+            previewBmp = WidgetRenderer.render(w, h, density, prefs, quotes, logos, previewBmp, half);
+            iv.setImageBitmap(previewBmp);
+        } finally {
+            NowPlaying.bind(null, null);
+        }
     }
 
     private String[] parseTickers(String raw) {
