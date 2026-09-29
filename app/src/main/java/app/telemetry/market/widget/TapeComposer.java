@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 
@@ -80,12 +79,6 @@ public final class TapeComposer {
         int fg = dark ? Color.rgb(18, 26, 34) : Color.rgb(248, 251, 253);
         int upC = dark ? Color.rgb(12, 118, 104) : Color.rgb(94, 234, 212);
         int downC = dark ? Color.rgb(196, 52, 56) : Color.rgb(240, 113, 120);
-        boolean chip = prefs.chipStyle;
-        if (chip) {
-            fg = Color.rgb(248, 251, 253);
-            upC = Color.rgb(94, 234, 212);
-            downC = Color.rgb(240, 113, 120);
-        }
         boolean showMove = !(prefs.hideMoveWhenClosed && QuoteFetcher.isClosedSession());
         boolean wantLogo = prefs.showLogos;
         float logoS = wantLogo ? symbolPx * 1.2f : 0f;
@@ -94,7 +87,7 @@ public final class TapeComposer {
         float unitW = 0f;
         for (int i = 0; i < tickers.length; i++) {
             unitW += segmentWidth(tickers[i], quoteOf(quotes, tickers[i], i), symbolPx, pricePx, pctSize,
-                    prefs.fontWeight, dark, dp, logoS, showMove, prefs.decimals, chip);
+                    prefs.fontWeight, dark, dp, logoS, showMove, prefs.decimals);
         }
         if (unitW < 8f) unitW = 8f;
 
@@ -119,7 +112,7 @@ public final class TapeComposer {
                     String symbol = tickers[i] == null ? "—" : tickers[i];
                     x = drawSegment(canvas, x, symbol, quoteOf(quotes, symbol, i), logos,
                             fg, upC, downC, symbolPx, pricePx, pctSize, prefs.fontWeight, dark, dp,
-                            logoS, baseline, height, showMove, prefs.decimals, chip);
+                            logoS, baseline, showMove, prefs.decimals);
                 }
             }
         }
@@ -138,75 +131,49 @@ public final class TapeComposer {
 
     private static float segmentWidth(
             String symbol, Quote q, float symbolPx, float pricePx, float pctSize,
-            String weight, boolean dark, float dp, float logoS, boolean showMove, int decimals, boolean chip) {
-        Paint sym = paint(Color.WHITE, symbolPx, "medium", dark || chip);
-        Paint prc = paint(Color.WHITE, pricePx, weight, dark || chip);
+            String weight, boolean dark, float dp, float logoS, boolean showMove, int decimals) {
+        Paint sym = paint(Color.WHITE, symbolPx, "medium", dark);
+        Paint prc = paint(Color.WHITE, pricePx, weight, dark);
         String priceTxt = WidgetRenderer.formatPrice(symbol, q == null ? 0 : q.price, decimals);
         float w = sym.measureText(symbol == null ? "—" : symbol) + 8f * dp + prc.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
             boolean up = q.changePct >= 0;
             String pctTxt = WidgetRenderer.formatMove(up, q.changePct, decimals);
-            Paint ch = paint(Color.WHITE, pctSize, "medium", dark || chip);
+            Paint ch = paint(Color.WHITE, pctSize, "medium", dark);
             w += 8f * dp + ch.measureText(pctTxt);
         }
+        w += 26f * dp;
         if (logoS > 0f) w += logoS + 6f * dp;
-        if (chip) w += 8f * dp + 10f * dp + 10f * dp;
-        else w += 26f * dp;
         return w;
     }
 
     private static float drawSegment(
             Canvas c, float x, String symbol, Quote q, Map<String, Bitmap> logos,
             int fg, int upC, int downC, float symbolPx, float pricePx, float pctSize,
-            String weight, boolean dark, float dp, float logoS, float baseline, int rowH,
-            boolean showMove, int decimals, boolean chip) {
-        float start = x;
-        boolean ink = dark || chip;
-        if (chip) {
-            float span = segmentWidth(symbol, q, symbolPx, pricePx, pctSize, weight, dark, dp, logoS, showMove, decimals, true);
-            float pillRight = start + span - 10f * dp;
-            float top = 1.5f * dp;
-            float bottom = Math.max(top + 8f, rowH - 1.5f * dp);
-            Paint pill = new Paint(Paint.ANTI_ALIAS_FLAG);
-            pill.setColor(Color.argb(236, 16, 18, 22));
-            float rad = (bottom - top) / 2f;
-            c.drawRoundRect(new RectF(start, top, pillRight, bottom), rad, rad, pill);
-            x += 8f * dp;
-        }
+            String weight, boolean dark, float dp, float logoS, float baseline, boolean showMove, int decimals) {
         if (logoS > 0f) {
             Bitmap lg = logos == null ? null : logos.get(symbol);
             if (lg != null && !lg.isRecycled()) {
-                float top = baseline - logoS * 0.82f;
-                RectF box = new RectF(x, top, x + logoS, top + logoS);
-                if (chip) {
-                    c.save();
-                    Path clip = new Path();
-                    clip.addCircle(box.centerX(), box.centerY(), logoS / 2f, Path.Direction.CW);
-                    c.clipPath(clip);
-                    c.drawBitmap(lg, null, box, new Paint(Paint.FILTER_BITMAP_FLAG));
-                    c.restore();
-                } else {
-                    c.drawBitmap(lg, null, box, new Paint(Paint.FILTER_BITMAP_FLAG));
-                }
+                c.drawBitmap(lg, null, new RectF(x, baseline - logoS * 0.82f, x + logoS, baseline - logoS * 0.82f + logoS),
+                        new Paint(Paint.FILTER_BITMAP_FLAG));
             }
             x += logoS + 6f * dp;
         }
-        Paint sym = paint(fg, symbolPx, "medium", ink);
+        Paint sym = paint(fg, symbolPx, "medium", dark);
         c.drawText(symbol, x, baseline, sym);
         x += sym.measureText(symbol) + 8f * dp;
         String priceTxt = WidgetRenderer.formatPrice(symbol, q == null ? 0 : q.price, decimals);
-        Paint prc = paint(fg, pricePx, weight, ink);
+        Paint prc = paint(fg, pricePx, weight, dark);
         c.drawText(priceTxt, x, baseline, prc);
         x += prc.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
             boolean up = q.changePct >= 0;
             String pctTxt = WidgetRenderer.formatMove(up, q.changePct, decimals);
-            Paint ch = paint(up ? upC : downC, pctSize, "medium", ink);
+            Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
             x += 8f * dp;
             c.drawText(pctTxt, x, baseline, ch);
             x += ch.measureText(pctTxt);
         }
-        if (chip) return start + segmentWidth(symbol, q, symbolPx, pricePx, pctSize, weight, dark, dp, logoS, showMove, decimals, true);
         return x + 26f * dp;
     }
 

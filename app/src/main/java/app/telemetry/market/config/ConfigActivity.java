@@ -153,7 +153,6 @@ public class ConfigActivity extends AppCompatActivity {
         refresh.setProgress(WidgetPrefs.refreshIndex(refreshMin));
         ((TextView) findViewById(R.id.refresh_label)).setText(WidgetPrefs.refreshLabel(refreshMin));
 
-        ((CheckBox) findViewById(R.id.chip_style)).setChecked(prefs.chipStyle);
         ((CheckBox) findViewById(R.id.header)).setChecked(prefs.showHeader);
         ((CheckBox) findViewById(R.id.logos)).setChecked(prefs.showLogos);
         ((CheckBox) findViewById(R.id.hide_move)).setChecked(prefs.hideMoveWhenClosed);
@@ -211,7 +210,7 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void bindPreviewListeners() {
         android.view.View.OnClickListener click = v -> refreshPreview();
-        int[] boxes = {R.id.chip_style, R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
+        int[] boxes = {R.id.glass_on, R.id.header, R.id.logos, R.id.hide_move, R.id.session_clock, R.id.border, R.id.sparklines, R.id.dividers};
         for (int id : boxes) ((CheckBox) findViewById(id)).setOnClickListener(click);
         int[] groups = {R.id.glass_style, R.id.glass_style2, R.id.size, R.id.tone, R.id.corner, R.id.weight, R.id.align_h, R.id.align_v, R.id.decimals};
         for (int id : groups) {
@@ -298,7 +297,6 @@ public class ConfigActivity extends AppCompatActivity {
         next.fontScale = 0.8f + ((SeekBar) findViewById(R.id.font_scale)).getProgress() / 100f;
         next.tickerScale = 0.8f + ((SeekBar) findViewById(R.id.ticker_scale)).getProgress() / 100f;
         next.marqueeSpeed = 0.1f + ((SeekBar) findViewById(R.id.marquee_speed)).getProgress() / 100f;
-        next.chipStyle = ((CheckBox) findViewById(R.id.chip_style)).isChecked();
         next.showHeader = ((CheckBox) findViewById(R.id.header)).isChecked();
         next.showLogos = ((CheckBox) findViewById(R.id.logos)).isChecked();
         next.hideMoveWhenClosed = ((CheckBox) findViewById(R.id.hide_move)).isChecked();
