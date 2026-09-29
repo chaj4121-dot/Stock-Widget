@@ -128,11 +128,11 @@ public final class WidgetRenderer {
 
         if (header) {
             Paint text = paint(fg, headerPx, "medium", dark);
-            c.drawText("MARKET TELEMETRY", left, top + pad + headerPx, text);
+            TextInk.draw(c, "MARKET TELEMETRY", left, top + pad + headerPx, text);
             if (!prefs.showSessionClock) {
                 Paint meta = paint(muted, headerPx, "regular", dark);
                 meta.setTextAlign(Paint.Align.RIGHT);
-                c.drawText(QuoteFetcher.sessionLabel() + "  " + QuoteFetcher.nyTime(), edge, top + pad + headerPx, meta);
+                TextInk.draw(c, QuoteFetcher.sessionLabel() + "  " + QuoteFetcher.nyTime(), edge, top + pad + headerPx, meta);
             }
         }
 
@@ -287,16 +287,16 @@ public final class WidgetRenderer {
             textX = bx + s + gap;
         }
         float baseline = y + Math.max(logoSize, symbolPx) * 0.76f;
-        c.drawText(symbol, textX, baseline, t);
+        TextInk.draw(c, symbol, textX, baseline, t);
 
         float cursor = y + Math.max(logoSize, symbolPx) + 3f * dp;
         if (spark && q != null && q.spark != null && q.spark.length > 1) {
             drawSpark(c, q.spark, bx, cursor, w, sparkH, tone);
             cursor += sparkH + 2f * dp;
         }
-        c.drawText(priceTxt, bx, cursor + pricePx, price);
+        TextInk.draw(c, priceTxt, bx, cursor + pricePx, price);
         if (showMove && q != null && q.price > 0) {
-            c.drawText(pctTxt, bx, cursor + pricePx + pctPx + 3f * dp, ch);
+            TextInk.draw(c, pctTxt, bx, cursor + pricePx + pctPx + 3f * dp, ch);
         }
     }
 
@@ -323,12 +323,12 @@ public final class WidgetRenderer {
                     new Paint(Paint.FILTER_BITMAP_FLAG));
             cx += logoSize + gap;
         }
-        c.drawText(symbol, cx, yBase, t);
+        TextInk.draw(c, symbol, cx, yBase, t);
         cx += t.measureText(symbol) + gap;
-        c.drawText(priceTxt, cx, yBase, price);
+        TextInk.draw(c, priceTxt, cx, yBase, price);
         cx += price.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
-            c.drawText(pctTxt, cx + gap, yBase, ch);
+            TextInk.draw(c, pctTxt, cx + gap, yBase, ch);
         }
     }
 
@@ -382,12 +382,12 @@ public final class WidgetRenderer {
                     cx += logoS + logoPad;
                 }
                 sym.setColor(fg);
-                c.drawText(symbol, cx, baseline, sym);
+                TextInk.draw(c, symbol, cx, baseline, sym);
                 cx += sym.measureText(symbol) + 8f * dp;
                 prc.setColor(fg);
-                c.drawText(priceTxt, cx, baseline, prc);
+                TextInk.draw(c, priceTxt, cx, baseline, prc);
                 cx += prc.measureText(priceTxt) + 8f * dp;
-                c.drawText(pctTxt, cx, baseline, ch);
+                TextInk.draw(c, pctTxt, cx, baseline, ch);
                 cx += ch.measureText(pctTxt) + segPad;
             }
         }
@@ -402,10 +402,11 @@ public final class WidgetRenderer {
         Paint tag = clockTag(size, dark);
         Paint val = clockValue(size, dark);
         float gap = 4f * dp;
-        int width = Math.max(1, Math.round(tag.measureText(b.tag) + gap + val.measureText(b.value) + dp));
-        int height = Math.max(1, Math.round(size + 3f * dp));
+        float pad = Math.max(3f * dp, size * 0.28f);
+        int width = Math.max(1, Math.round(tag.measureText(b.tag) + gap + val.measureText(b.value) + pad));
+        int height = Math.max(1, Math.round(size + pad));
         Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        drawClockText(new Canvas(bmp), b, 0f, size + dp, gap, tag, val);
+        drawClockText(new Canvas(bmp), b, pad * 0.15f, size + pad * 0.2f, gap, tag, val);
         return bmp;
     }
 
@@ -426,8 +427,8 @@ public final class WidgetRenderer {
 
     private static void drawClockText(
             Canvas c, SessionClock.Badge b, float x, float baseline, float gap, Paint tag, Paint val) {
-        c.drawText(b.tag, x, baseline, tag);
-        c.drawText(b.value, x + tag.measureText(b.tag) + gap, baseline, val);
+        TextInk.draw(c, b.tag, x, baseline, tag);
+        TextInk.draw(c, b.value, x + tag.measureText(b.tag) + gap, baseline, val);
     }
 
     private static void drawPinnedClock(

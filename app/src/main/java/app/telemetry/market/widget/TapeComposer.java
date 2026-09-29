@@ -98,7 +98,7 @@ public final class TapeComposer {
         int full = periodPx * 2;
 
         float row = Math.max(logoS, Math.max(symbolPx, pricePx));
-        int height = Math.max(1, Math.round(row + 8f * dp));
+        int height = Math.max(1, Math.round(row + 12f * dp));
         float baseline = height - Math.max(3f * dp, pricePx * 0.28f);
 
         Bitmap bitmap = Bitmap.createBitmap(full, height, Bitmap.Config.ARGB_8888);
@@ -160,18 +160,18 @@ public final class TapeComposer {
             x += logoS + 6f * dp;
         }
         Paint sym = paint(fg, symbolPx, "medium", dark);
-        c.drawText(symbol, x, baseline, sym);
+        TextInk.draw(c, symbol, x, baseline, sym);
         x += sym.measureText(symbol) + 8f * dp;
         String priceTxt = WidgetRenderer.formatPrice(symbol, q == null ? 0 : q.price, decimals);
         Paint prc = paint(fg, pricePx, weight, dark);
-        c.drawText(priceTxt, x, baseline, prc);
+        TextInk.draw(c, priceTxt, x, baseline, prc);
         x += prc.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
             boolean up = q.changePct >= 0;
             String pctTxt = WidgetRenderer.formatMove(up, q.changePct, decimals);
             Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
             x += 8f * dp;
-            c.drawText(pctTxt, x, baseline, ch);
+            TextInk.draw(c, pctTxt, x, baseline, ch);
             x += ch.measureText(pctTxt);
         }
         return x + 26f * dp;
