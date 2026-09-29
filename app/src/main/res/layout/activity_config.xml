@@ -57,6 +57,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
+            android:text="표시"
+            android:textColor="@color/steel" />
+
+        <CheckBox
+            android:id="@+id/chip_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="재생 칩처럼 표시"
+            android:textColor="@color/paper" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="상단 재생 중 알약처럼, 로고와 티커·주가를 검은 칸에 넣어 순환합니다. 끄면 글자만 흐릅니다."
+            android:textColor="@color/steel"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
             android:text="글래스"
             android:textColor="@color/steel" />
 

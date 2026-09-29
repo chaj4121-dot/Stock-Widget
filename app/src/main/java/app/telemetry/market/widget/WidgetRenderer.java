@@ -111,7 +111,7 @@ public final class WidgetRenderer {
         else top = Math.max(0, (h - contentH) / 2f);
         float radius = prefs.cornerPx(dp, contentH);
 
-        if (prefs.glassOn) drawGlass(c, w, top, contentH, radius, prefs);
+        if (prefs.glassOn && !prefs.chipStyle) drawGlass(c, w, top, contentH, radius, prefs);
 
         int fg = dark ? Color.rgb(18, 26, 34) : Color.rgb(248, 251, 253);
         int muted = dark ? Color.argb(170, 18, 26, 34) : Color.argb(200, 248, 251, 253);
@@ -355,8 +355,10 @@ public final class WidgetRenderer {
             String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
             Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
             float w = sym.measureText(symbol) + 8f * dp + prc.measureText(priceTxt)
-                    + 8f * dp + ch.measureText(pctTxt) + segPad;
+                    + 8f * dp + ch.measureText(pctTxt);
             if (logoS > 0) w += logoS + logoPad;
+            if (prefs.chipStyle) w += 8f * dp + 10f * dp + 10f * dp;
+            else w += segPad;
             segW[i] = w;
             stripW += w;
         }
@@ -374,21 +376,46 @@ public final class WidgetRenderer {
                 boolean up = q != null && q.changePct >= 0;
                 String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
                 String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
-                Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
+                int segFg = prefs.chipStyle ? Color.rgb(248, 251, 253) : fg;
+                int segUp = prefs.chipStyle ? Color.rgb(94, 234, 212) : upC;
+                int segDown = prefs.chipStyle ? Color.rgb(240, 113, 120) : downC;
+                Paint ch = paint(up ? segUp : segDown, pctSize, "medium", dark || prefs.chipStyle);
+                float segStart = cx;
+                if (prefs.chipStyle) {
+                    float pillRight = segStart + segW[i] - 10f * dp;
+                    float top = baseline - Math.max(logoS, pricePx) * 0.95f;
+                    float bottom = baseline + pricePx * 0.28f;
+                    Paint pill = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    pill.setColor(Color.argb(236, 16, 18, 22));
+                    float rad = Math.max(1f, (bottom - top) / 2f);
+                    c.drawRoundRect(new RectF(segStart, top, pillRight, bottom), rad, rad, pill);
+                    cx += 8f * dp;
+                }
                 Bitmap lg = logos == null ? null : logos.get(symbol);
                 if (lg != null && prefs.showLogos) {
                     Paint bp = new Paint(Paint.FILTER_BITMAP_FLAG);
-                    c.drawBitmap(lg, null, new RectF(cx, baseline - logoS * 0.8f, cx + logoS, baseline - logoS * 0.8f + logoS), bp);
+                    float top = baseline - logoS * 0.8f;
+                    RectF box = new RectF(cx, top, cx + logoS, top + logoS);
+                    if (prefs.chipStyle) {
+                        c.save();
+                        Path clip = new Path();
+                        clip.addCircle(box.centerX(), box.centerY(), logoS / 2f, Path.Direction.CW);
+                        c.clipPath(clip);
+                        c.drawBitmap(lg, null, box, bp);
+                        c.restore();
+                    } else {
+                        c.drawBitmap(lg, null, box, bp);
+                    }
                     cx += logoS + logoPad;
                 }
-                sym.setColor(fg);
+                sym.setColor(segFg);
                 c.drawText(symbol, cx, baseline, sym);
                 cx += sym.measureText(symbol) + 8f * dp;
-                prc.setColor(fg);
+                prc.setColor(segFg);
                 c.drawText(priceTxt, cx, baseline, prc);
                 cx += prc.measureText(priceTxt) + 8f * dp;
                 c.drawText(pctTxt, cx, baseline, ch);
-                cx += ch.measureText(pctTxt) + segPad;
+                cx = prefs.chipStyle ? segStart + segW[i] : cx + ch.measureText(pctTxt) + segPad;
             }
         }
     }
