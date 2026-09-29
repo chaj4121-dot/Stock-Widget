@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import app.telemetry.market.media.NowPlaying;
 import app.telemetry.market.quote.Quote;
 import app.telemetry.market.quote.QuoteFetcher;
 import app.telemetry.market.quote.SessionClock;
@@ -345,11 +344,8 @@ public final class WidgetRenderer {
         float logoS = prefs.showLogos ? symbolPx * 1.2f : 0;
         float segPad = 26f * dp;
         float logoPad = 6f * dp;
-        NowPlaying.Track media = prefs.showNowPlaying ? NowPlaying.bound() : null;
-        Bitmap mediaIcon = media == null ? null : NowPlaying.boundIcon();
-        float mediaW = media == null ? 0f : TapeComposer.mediaWidth(media, mediaIcon, symbolPx, pricePx, dark, dp);
 
-        float stripW = mediaW;
+        float stripW = 0;
         float[] segW = new float[prefs.tickers.length];
         for (int i = 0; i < prefs.tickers.length; i++) {
             String symbol = prefs.tickers[i];
@@ -372,9 +368,6 @@ public final class WidgetRenderer {
         for (int pass = 0; pass < 2; pass++) {
             float cx = x0 + pass * stripW;
             if (cx > right) break;
-            if (media != null) {
-                cx = TapeComposer.drawMedia(c, cx, media, mediaIcon, fg, symbolPx, pricePx, dark, dp, baseline);
-            }
             for (int i = 0; i < prefs.tickers.length; i++) {
                 String symbol = prefs.tickers[i];
                 Quote q = quoteOf(quotes, symbol, i);

@@ -56,35 +56,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="재생 중"
-            android:textColor="@color/steel" />
-
-        <CheckBox
-            android:id="@+id/now_playing"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="흐름에 재생 중인 곡"
-            android:textColor="@color/paper" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="종목과 따로 한 칸입니다. 앱 아이콘, 곡 제목, 아티스트가 시세와 같이 돕니다. 재생 중일 때만 나오고, 알림 접근이 필요합니다."
-            android:textColor="@color/steel"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/now_playing_access"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:layout_marginTop="6dp"
-            android:text="알림 접근 허용"
-            android:textColor="@color/paper" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
             android:text="글래스"
             android:textColor="@color/steel" />

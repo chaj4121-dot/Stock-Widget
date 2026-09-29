@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import app.telemetry.market.media.NowPlaying;
 import app.telemetry.market.quote.Quote;
 import app.telemetry.market.quote.QuoteFetcher;
 
@@ -85,10 +84,7 @@ public final class TapeComposer {
         float logoS = wantLogo ? symbolPx * 1.2f : 0f;
 
         String[] tickers = prefs.tickers == null ? new String[0] : prefs.tickers;
-        NowPlaying.Track media = prefs.showNowPlaying ? NowPlaying.bound() : null;
-        Bitmap mediaIcon = media == null ? null : NowPlaying.boundIcon();
         float unitW = 0f;
-        if (media != null) unitW += mediaWidth(media, mediaIcon, symbolPx, pricePx, dark, dp);
         for (int i = 0; i < tickers.length; i++) {
             unitW += segmentWidth(tickers[i], quoteOf(quotes, tickers[i], i), symbolPx, pricePx, pctSize,
                     prefs.fontWeight, dark, dp, logoS, showMove, prefs.decimals);
@@ -112,9 +108,6 @@ public final class TapeComposer {
             float start = copy * periodPx;
             x = start;
             for (int r = 0; r < reps; r++) {
-                if (media != null) {
-                    x = drawMedia(canvas, x, media, mediaIcon, fg, symbolPx, pricePx, dark, dp, baseline);
-                }
                 for (int i = 0; i < tickers.length; i++) {
                     String symbol = tickers[i] == null ? "—" : tickers[i];
                     x = drawSegment(canvas, x, symbol, quoteOf(quotes, symbol, i), logos,
@@ -182,52 +175,6 @@ public final class TapeComposer {
             x += ch.measureText(pctTxt);
         }
         return x + 26f * dp;
-    }
-
-    static float mediaWidth(
-            NowPlaying.Track track, Bitmap icon, float symbolPx, float pricePx, boolean dark, float dp) {
-        float logo = symbolPx * 1.15f;
-        Paint title = paint(Color.WHITE, symbolPx, "medium", dark);
-        Paint artist = paint(Color.WHITE, Math.max(10f * dp, pricePx * 0.62f), "regular", dark);
-        float w = (icon == null ? 0f : logo + 6f * dp) + title.measureText(clip(title, track.title, symbolPx * 12f));
-        String who = track.artist == null ? "" : track.artist;
-        if (!who.isEmpty()) w += 8f * dp + artist.measureText(clip(artist, who, symbolPx * 9f));
-        return w + 26f * dp;
-    }
-
-    static float drawMedia(
-            Canvas c, float x, NowPlaying.Track track, Bitmap icon, int fg,
-            float symbolPx, float pricePx, boolean dark, float dp, float baseline) {
-        float logo = symbolPx * 1.15f;
-        if (icon != null && !icon.isRecycled()) {
-            float top = baseline - logo * 0.82f;
-            c.drawBitmap(icon, null, new RectF(x, top, x + logo, top + logo), new Paint(Paint.FILTER_BITMAP_FLAG));
-            x += logo + 6f * dp;
-        }
-        Paint title = paint(fg, symbolPx, "medium", dark);
-        String name = clip(title, track.title, symbolPx * 12f);
-        c.drawText(name, x, baseline, title);
-        x += title.measureText(name);
-        String who = track.artist == null ? "" : track.artist;
-        if (!who.isEmpty()) {
-            Paint artist = paint(
-                    dark ? Color.argb(170, 18, 26, 34) : Color.argb(210, 186, 214, 230),
-                    Math.max(10f * dp, pricePx * 0.62f), "regular", dark);
-            String label = clip(artist, who, symbolPx * 9f);
-            x += 8f * dp;
-            c.drawText(label, x, baseline, artist);
-            x += artist.measureText(label);
-        }
-        return x + 26f * dp;
-    }
-
-    private static String clip(Paint p, String raw, float max) {
-        String s = raw == null ? "" : raw.trim();
-        if (s.isEmpty() || p.measureText(s) <= max) return s;
-        String ell = "…";
-        int end = s.length();
-        while (end > 1 && p.measureText(s.substring(0, end) + ell) > max) end--;
-        return s.substring(0, Math.max(1, end)) + ell;
     }
 
     private static Quote quoteOf(List<Quote> quotes, String symbol, int i) {
