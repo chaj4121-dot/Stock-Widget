@@ -41,7 +41,7 @@ public final class SessionClock {
         ZonedDateTime preStart = at(now, 4, 0);
         if (isWeekend(now)) {
             if (now.getDayOfWeek() == DayOfWeek.SUNDAY && !now.isBefore(afterEnd)) {
-                return new Badge("24H", remain(Duration.between(now, nextOpen(now))));
+                return new Badge("24H OPEN", remain(Duration.between(now, nextOpen(now))));
             }
             return new Badge("OPENS", remain(Duration.between(now, nextOpen(now))));
         }
@@ -54,7 +54,7 @@ public final class SessionClock {
         if (!now.isBefore(close) && now.isBefore(afterEnd)) {
             return new Badge("AFTER", remain(Duration.between(now, afterEnd)));
         }
-        return new Badge("24H", remain(Duration.between(now, nextOpen(now))));
+        return new Badge("24H OPEN", remain(Duration.between(now, nextOpen(now))));
     }
 
     private static ZonedDateTime at(ZonedDateTime now, int hour, int minute) {

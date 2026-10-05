@@ -397,7 +397,7 @@ public final class WidgetRenderer {
         SessionClock.Badge b = SessionClock.badge();
         float size = clockSize(prefs, dp);
         Paint tag = clockTag(size, dark, b.tag);
-        Paint val = clockValue(size, dark, b.tag);
+        Paint val = clockValue(size, dark);
         float gap = 4f * dp;
         float pad = Math.max(2f * dp, size * 0.12f);
         int width = Math.max(1, Math.round(tag.measureText(b.tag) + gap + val.measureText(b.value) + pad));
@@ -414,7 +414,7 @@ public final class WidgetRenderer {
 
     private static int sessionColor(String tag, boolean dark) {
         if ("PRE".equals(tag)) return dark ? Color.rgb(176, 112, 18) : Color.rgb(255, 186, 72);
-        if ("24H".equals(tag)) return dark ? Color.rgb(98, 64, 168) : Color.rgb(196, 168, 255);
+        if (tag != null && tag.startsWith("24H")) return dark ? Color.rgb(98, 64, 168) : Color.rgb(196, 168, 255);
         if ("CLOSES".equals(tag)) return dark ? Color.rgb(10, 112, 98) : Color.rgb(94, 234, 212);
         if ("AFTER".equals(tag)) return dark ? Color.rgb(168, 58, 68) : Color.rgb(255, 140, 150);
         return dark ? Color.rgb(42, 78, 156) : Color.rgb(150, 188, 255);
@@ -426,8 +426,8 @@ public final class WidgetRenderer {
         return tagPaint;
     }
 
-    private static Paint clockValue(float size, boolean dark, String tag) {
-        return paint(sessionColor(tag, dark), size, "medium", dark);
+    private static Paint clockValue(float size, boolean dark) {
+        return paint(dark ? Color.rgb(18, 26, 34) : Color.rgb(248, 251, 253), size, "medium", dark);
     }
 
     private static void drawClockText(
@@ -442,7 +442,7 @@ public final class WidgetRenderer {
         SessionClock.Badge b = SessionClock.badge();
         float size = clockSize(prefs, dp);
         Paint tag = clockTag(size, dark, b.tag);
-        Paint val = clockValue(size, dark, b.tag);
+        Paint val = clockValue(size, dark);
         float gap = 4f * dp;
         float width = tag.measureText(b.tag) + gap + val.measureText(b.value);
         float shift = Math.max(0f, Math.min(1f, prefs.clockShift));
