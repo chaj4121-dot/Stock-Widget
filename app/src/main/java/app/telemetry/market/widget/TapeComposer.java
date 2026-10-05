@@ -139,9 +139,8 @@ public final class TapeComposer {
         float w = sym.measureText(symbol == null ? "—" : symbol) + 8f * dp + prc.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
             boolean up = q.changePct >= 0;
-            String pctTxt = WidgetRenderer.formatMove(up, q.changePct, decimals);
             Paint ch = paint(Color.WHITE, pctSize, "medium", dark);
-            w += 8f * dp + ch.measureText(pctTxt);
+            w += 8f * dp + WidgetRenderer.moveWidth(ch, up, q.changePct, decimals);
         }
         w += 26f * dp;
         if (logoS > 0f) w += logoS + 6f * dp;
@@ -169,11 +168,10 @@ public final class TapeComposer {
         x += prc.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
             boolean up = q.changePct >= 0;
-            String pctTxt = WidgetRenderer.formatMove(up, q.changePct, decimals);
             Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
             x += 8f * dp;
-            TextInk.draw(c, pctTxt, x, baseline, ch);
-            x += ch.measureText(pctTxt);
+            WidgetRenderer.drawMove(c, x, baseline, ch, up, q.changePct, decimals);
+            x += WidgetRenderer.moveWidth(ch, up, q.changePct, decimals);
         }
         return x + 26f * dp;
     }

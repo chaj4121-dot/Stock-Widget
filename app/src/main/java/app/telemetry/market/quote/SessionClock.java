@@ -9,9 +9,10 @@ import java.time.temporal.ChronoUnit;
 
 /**
  * US session badge. Times are America/New_York.
- * PRE is the overnight book and the cash pre-market, counting down to the open.
- * CLOSES is the regular session. AFTER is the after-hours book.
- * OPENS is a full close (weekend before Sunday 20:00 ET).
+ * PRE is only the cash pre-market, 04:00–09:30 ET.
+ * 24H is the overnight book, including Sunday after 20:00 ET, when brokers
+ * still print a quote. CLOSES is the regular session. AFTER is after-hours.
+ * OPENS is a full close before that overnight book.
  */
 public final class SessionClock {
     private static final ZoneId NY = ZoneId.of("America/New_York");
@@ -40,7 +41,7 @@ public final class SessionClock {
         ZonedDateTime preStart = at(now, 4, 0);
         if (isWeekend(now)) {
             if (now.getDayOfWeek() == DayOfWeek.SUNDAY && !now.isBefore(afterEnd)) {
-                return new Badge("PRE", remain(Duration.between(now, nextOpen(now))));
+                return new Badge("24H", remain(Duration.between(now, nextOpen(now))));
             }
             return new Badge("OPENS", remain(Duration.between(now, nextOpen(now))));
         }
@@ -53,7 +54,7 @@ public final class SessionClock {
         if (!now.isBefore(close) && now.isBefore(afterEnd)) {
             return new Badge("AFTER", remain(Duration.between(now, afterEnd)));
         }
-        return new Badge("PRE", remain(Duration.between(now, nextOpen(now))));
+        return new Badge("24H", remain(Duration.between(now, nextOpen(now))));
     }
 
     private static ZonedDateTime at(ZonedDateTime now, int hour, int minute) {

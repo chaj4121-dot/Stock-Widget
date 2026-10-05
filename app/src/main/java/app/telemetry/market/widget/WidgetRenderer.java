@@ -171,10 +171,9 @@ public final class WidgetRenderer {
                 boolean upv = q != null && q.changePct >= 0;
                 Paint mc = paint(upv ? upC : downC, pctPxW, "medium", dark);
                 String pTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
-                String cTxt = formatMove(upv, q == null ? 0 : q.changePct, prefs.decimals);
                 float gapw = 8f * dp;
                 float need = (logoSz > 0 ? logoSz + gapw : 0) + mt.measureText(symbol) + gapw
-                        + mp.measureText(pTxt) + (showMove && q != null && q.price > 0 ? gapw + mc.measureText(cTxt) : 0);
+                        + mp.measureText(pTxt) + (showMove && q != null && q.price > 0 ? gapw + moveWidth(mc, upv, q == null ? 0 : q.changePct, prefs.decimals) : 0);
                 float f = need > colW2 * 0.92f ? (colW2 * 0.92f) / need : 1f;
                 drawWideCol(c, q, symbol, x + colW2 * 0.04f, yBase, colW2 * 0.92f, prefs, showMove,
                         fg, upC, downC, dark, dp, symPx * f, prcPx * f, pctPxW * f, logoBmp, logoSz * f);
@@ -265,7 +264,6 @@ public final class WidgetRenderer {
         boolean up = q != null && q.changePct >= 0;
         int tone = up ? upC : downC;
         String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
-        String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
         Paint t = paint(fg, symbolPx, "medium", dark);
         Paint price = paint(fg, pricePx, prefs.fontWeight, dark);
         Paint ch = paint(tone, pctPx, "medium", dark);
@@ -273,7 +271,7 @@ public final class WidgetRenderer {
         float logoW = (logo != null && prefs.showLogos) ? Math.round(logoSize) : 0;
         float row1 = (logoW > 0 ? logoW + gap : 0) + t.measureText(symbol);
         float row2 = price.measureText(priceTxt);
-        float row3 = (showMove && q != null && q.price > 0) ? ch.measureText(pctTxt) : 0;
+        float row3 = (showMove && q != null && q.price > 0) ? moveWidth(ch, up, q.changePct, prefs.decimals) : 0;
         float block = Math.max(row1, Math.max(row2, row3));
         float ox = 0;
         if ("center".equals(prefs.alignH)) ox = Math.max(0, (w - block) / 2f);
@@ -297,7 +295,7 @@ public final class WidgetRenderer {
         }
         TextInk.draw(c, priceTxt, bx, cursor + pricePx, price);
         if (showMove && q != null && q.price > 0) {
-            TextInk.draw(c, pctTxt, bx, cursor + pricePx + pctPx + 3f * dp, ch);
+            drawMove(c, bx, cursor + pricePx + pctPx + 3f * dp, ch, up, q.changePct, prefs.decimals);
         }
     }
 
@@ -310,12 +308,11 @@ public final class WidgetRenderer {
         Paint price = paint(fg, prcPx, prefs.fontWeight, dark);
         Paint ch = paint(up ? upC : downC, pctPx, "medium", dark);
         String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
-        String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
         float gap = 8f * dp;
         float logoW = (logo != null && prefs.showLogos) ? logoSize : 0;
         float block = logoW + (logoW > 0 ? gap : 0) + t.measureText(symbol) + gap
                 + price.measureText(priceTxt)
-                + (showMove && q != null && q.price > 0 ? gap + ch.measureText(pctTxt) : 0);
+                + (showMove && q != null && q.price > 0 ? gap + moveWidth(ch, up, q.changePct, prefs.decimals) : 0);
         float cx = x;
         if ("center".equals(prefs.alignH)) cx = x + Math.max(0, (w - block) / 2f);
         else if ("right".equals(prefs.alignH)) cx = x + Math.max(0, w - block);
@@ -329,7 +326,7 @@ public final class WidgetRenderer {
         TextInk.draw(c, priceTxt, cx, yBase, price);
         cx += price.measureText(priceTxt);
         if (showMove && q != null && q.price > 0) {
-            TextInk.draw(c, pctTxt, cx + gap, yBase, ch);
+            drawMove(c, cx + gap, yBase, ch, up, q.changePct, prefs.decimals);
         }
     }
 
@@ -353,10 +350,9 @@ public final class WidgetRenderer {
             Quote q = quoteOf(quotes, symbol, i);
             boolean up = q != null && q.changePct >= 0;
             String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
-            String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
             Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
             float w = sym.measureText(symbol) + 8f * dp + prc.measureText(priceTxt)
-                    + 8f * dp + ch.measureText(pctTxt) + segPad;
+                    + 8f * dp + moveWidth(ch, up, q == null ? 0 : q.changePct, prefs.decimals) + segPad;
             if (logoS > 0) w += logoS + logoPad;
             segW[i] = w;
             stripW += w;
@@ -374,7 +370,6 @@ public final class WidgetRenderer {
                 Quote q = quoteOf(quotes, symbol, i);
                 boolean up = q != null && q.changePct >= 0;
                 String priceTxt = formatPrice(symbol, q == null ? 0 : q.price, prefs.decimals);
-                String pctTxt = formatMove(up, q == null ? 0 : q.changePct, prefs.decimals);
                 Paint ch = paint(up ? upC : downC, pctSize, "medium", dark);
                 Bitmap lg = logos == null ? null : logos.get(symbol);
                 if (lg != null && prefs.showLogos) {
@@ -388,8 +383,8 @@ public final class WidgetRenderer {
                 prc.setColor(fg);
                 TextInk.draw(c, priceTxt, cx, baseline, prc);
                 cx += prc.measureText(priceTxt) + 8f * dp;
-                TextInk.draw(c, pctTxt, cx, baseline, ch);
-                cx += ch.measureText(pctTxt) + segPad;
+                drawMove(c, cx, baseline, ch, up, q == null ? 0 : q.changePct, prefs.decimals);
+                cx += moveWidth(ch, up, q == null ? 0 : q.changePct, prefs.decimals) + segPad;
             }
         }
     }
@@ -419,6 +414,7 @@ public final class WidgetRenderer {
 
     private static int sessionColor(String tag, boolean dark) {
         if ("PRE".equals(tag)) return dark ? Color.rgb(176, 112, 18) : Color.rgb(255, 186, 72);
+        if ("24H".equals(tag)) return dark ? Color.rgb(98, 64, 168) : Color.rgb(196, 168, 255);
         if ("CLOSES".equals(tag)) return dark ? Color.rgb(10, 112, 98) : Color.rgb(94, 234, 212);
         if ("AFTER".equals(tag)) return dark ? Color.rgb(168, 58, 68) : Color.rgb(255, 140, 150);
         return dark ? Color.rgb(42, 78, 156) : Color.rgb(150, 188, 255);
@@ -483,11 +479,45 @@ public final class WidgetRenderer {
         return String.format(Locale.US, "$%,." + d + "f", price);
     }
 
-    static String formatMove(boolean up, double pct, int decimals) {
+    static boolean sharpMove(double pct) {
+        return Math.abs(pct) >= 5.0;
+    }
+
+    static float moveWidth(Paint paint, boolean up, double pct, int decimals) {
+        String num = formatPct(pct, decimals);
+        if (!sharpMove(pct)) return paint.measureText((up ? "▲ " : "▼ ") + num);
+        Paint mini = arrowPaint(paint);
+        return mini.measureText(up ? "▲" : "▼") + paint.measureText(" ") + paint.measureText(num);
+    }
+
+    static void drawMove(Canvas c, float x, float baseline, Paint paint, boolean up, double pct, int decimals) {
+        String arrow = up ? "▲" : "▼";
+        String num = formatPct(pct, decimals);
+        if (!sharpMove(pct)) {
+            TextInk.draw(c, arrow + " " + num, x, baseline, paint);
+            return;
+        }
+        Paint mini = arrowPaint(paint);
+        float aw = mini.measureText(arrow);
+        float lift = paint.getTextSize() * 0.30f;
+        TextInk.draw(c, arrow, x, baseline - lift, mini);
+        TextInk.draw(c, arrow, x, baseline + lift * 0.42f, mini);
+        TextInk.draw(c, num, x + aw + paint.measureText(" "), baseline, paint);
+    }
+
+    private static Paint arrowPaint(Paint paint) {
+        Paint mini = new Paint(paint);
+        mini.setTextSize(paint.getTextSize() * 0.58f);
+        return mini;
+    }
+
+    private static String formatPct(double pct, int decimals) {
         int d = decimals <= 0 ? 0 : decimals == 1 ? 1 : 2;
-        boolean sharp = Math.abs(pct) >= 5.0;
-        String arrow = up ? (sharp ? "▲▲ " : "▲ ") : (sharp ? "▼▼ " : "▼ ");
-        return arrow + String.format(Locale.US, "%." + d + "f%%", Math.abs(pct));
+        return String.format(Locale.US, "%." + d + "f%%", Math.abs(pct));
+    }
+
+    static String formatMove(boolean up, double pct, int decimals) {
+        return (up ? "▲ " : "▼ ") + formatPct(pct, decimals);
     }
 
     private static void drawSpark(Canvas c, float[] values, float x, float y, float w, float h, int color) {
