@@ -401,8 +401,8 @@ public final class WidgetRenderer {
         TextInk.use(prefs.textHalo);
         SessionClock.Badge b = SessionClock.badge();
         float size = clockSize(prefs, dp);
-        Paint tag = clockTag(size, dark);
-        Paint val = clockValue(size, dark);
+        Paint tag = clockTag(size, dark, b.tag);
+        Paint val = clockValue(size, dark, b.tag);
         float gap = 4f * dp;
         float pad = Math.max(2f * dp, size * 0.12f);
         int width = Math.max(1, Math.round(tag.measureText(b.tag) + gap + val.measureText(b.value) + pad));
@@ -417,14 +417,21 @@ public final class WidgetRenderer {
         return 11.5f * dp * Math.max(0.7f, Math.min(1.9f, scale));
     }
 
-    private static Paint clockTag(float size, boolean dark) {
-        Paint tag = paint(dark ? Color.rgb(140, 88, 12) : Color.rgb(255, 196, 92), size, "bold", dark);
-        tag.setLetterSpacing(0.04f);
-        return tag;
+    private static int sessionColor(String tag, boolean dark) {
+        if ("PRE".equals(tag)) return dark ? Color.rgb(176, 112, 18) : Color.rgb(255, 186, 72);
+        if ("CLOSES".equals(tag)) return dark ? Color.rgb(10, 112, 98) : Color.rgb(94, 234, 212);
+        if ("AFTER".equals(tag)) return dark ? Color.rgb(168, 58, 68) : Color.rgb(255, 140, 150);
+        return dark ? Color.rgb(42, 78, 156) : Color.rgb(150, 188, 255);
     }
 
-    private static Paint clockValue(float size, boolean dark) {
-        return paint(dark ? Color.rgb(18, 26, 34) : Color.rgb(248, 251, 253), size, "medium", dark);
+    private static Paint clockTag(float size, boolean dark, String tag) {
+        Paint tagPaint = paint(sessionColor(tag, dark), size, "bold", dark);
+        tagPaint.setLetterSpacing(0.04f);
+        return tagPaint;
+    }
+
+    private static Paint clockValue(float size, boolean dark, String tag) {
+        return paint(sessionColor(tag, dark), size, "medium", dark);
     }
 
     private static void drawClockText(
@@ -438,8 +445,8 @@ public final class WidgetRenderer {
         if (!prefs.showSessionClock) return;
         SessionClock.Badge b = SessionClock.badge();
         float size = clockSize(prefs, dp);
-        Paint tag = clockTag(size, dark);
-        Paint val = clockValue(size, dark);
+        Paint tag = clockTag(size, dark, b.tag);
+        Paint val = clockValue(size, dark, b.tag);
         float gap = 4f * dp;
         float width = tag.measureText(b.tag) + gap + val.measureText(b.value);
         float shift = Math.max(0f, Math.min(1f, prefs.clockShift));
@@ -478,7 +485,9 @@ public final class WidgetRenderer {
 
     static String formatMove(boolean up, double pct, int decimals) {
         int d = decimals <= 0 ? 0 : decimals == 1 ? 1 : 2;
-        return (up ? "▲ " : "▼ ") + String.format(Locale.US, "%." + d + "f%%", Math.abs(pct));
+        boolean sharp = Math.abs(pct) >= 5.0;
+        String arrow = up ? (sharp ? "▲▲ " : "▲ ") : (sharp ? "▼▼ " : "▼ ");
+        return arrow + String.format(Locale.US, "%." + d + "f%%", Math.abs(pct));
     }
 
     private static void drawSpark(Canvas c, float[] values, float x, float y, float w, float h, int color) {

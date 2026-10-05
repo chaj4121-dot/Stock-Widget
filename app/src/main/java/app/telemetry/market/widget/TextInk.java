@@ -24,14 +24,12 @@ public final class TextInk {
         }
         float size = Math.max(1f, fill.getTextSize());
         boolean light = luminance(fill.getColor()) >= 148;
-        Paint edge = new Paint(fill);
-        edge.setStyle(Paint.Style.STROKE);
-        edge.setStrokeJoin(Paint.Join.ROUND);
-        edge.setStrokeWidth(Math.max(0.8f, size * 0.035f));
-        edge.clearShadowLayer();
-        edge.setColor(light ? Color.argb(210, 8, 10, 14) : Color.argb(210, 255, 255, 255));
-        c.drawText(text, x, y, edge);
-        c.drawText(text, x, y, fill);
+        Paint ink = new Paint(fill);
+        ink.clearShadowLayer();
+        float blur = Math.max(1.1f, size * 0.055f);
+        int shade = light ? Color.argb(185, 0, 0, 0) : Color.argb(170, 255, 255, 255);
+        ink.setShadowLayer(blur, 0f, 0f, shade);
+        c.drawText(text, x, y, ink);
     }
 
     private static int luminance(int color) {

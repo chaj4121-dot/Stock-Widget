@@ -8,8 +8,10 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 /**
- * US session badge. Pre and overnight show time until the cash open.
- * Regular hours and after-hours show time left until that session ends.
+ * US session badge. Times are America/New_York.
+ * PRE is the overnight book and the cash pre-market, counting down to the open.
+ * CLOSES is the regular session. AFTER is the after-hours book.
+ * OPENS is a full close (weekend before Sunday 20:00 ET).
  */
 public final class SessionClock {
     private static final ZoneId NY = ZoneId.of("America/New_York");
@@ -32,15 +34,18 @@ public final class SessionClock {
 
     static Badge badge(long epochMs) {
         ZonedDateTime now = Instant.ofEpochMilli(epochMs).atZone(NY);
-        if (isWeekend(now)) {
-            return new Badge("OPENS", remain(Duration.between(now, nextOpen(now))));
-        }
         ZonedDateTime open = at(now, 9, 30);
         ZonedDateTime close = at(now, 16, 0);
         ZonedDateTime afterEnd = at(now, 20, 0);
         ZonedDateTime preStart = at(now, 4, 0);
+        if (isWeekend(now)) {
+            if (now.getDayOfWeek() == DayOfWeek.SUNDAY && !now.isBefore(afterEnd)) {
+                return new Badge("PRE", remain(Duration.between(now, nextOpen(now))));
+            }
+            return new Badge("OPENS", remain(Duration.between(now, nextOpen(now))));
+        }
         if (!now.isBefore(preStart) && now.isBefore(open)) {
-            return new Badge("OPENS", remain(Duration.between(now, open)));
+            return new Badge("PRE", remain(Duration.between(now, open)));
         }
         if (!now.isBefore(open) && now.isBefore(close)) {
             return new Badge("CLOSES", remain(Duration.between(now, close)));
@@ -48,7 +53,7 @@ public final class SessionClock {
         if (!now.isBefore(close) && now.isBefore(afterEnd)) {
             return new Badge("AFTER", remain(Duration.between(now, afterEnd)));
         }
-        return new Badge("OPENS", remain(Duration.between(now, nextOpen(now))));
+        return new Badge("PRE", remain(Duration.between(now, nextOpen(now))));
     }
 
     private static ZonedDateTime at(ZonedDateTime now, int hour, int minute) {
